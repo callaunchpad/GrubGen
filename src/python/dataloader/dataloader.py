@@ -13,7 +13,7 @@ import random
 # In[9]:
 
 
-path = "..\\..\\..\\resources\\processed" #change to npy files UPMC_Food101/images/train
+path = "../../../resources/processed" #change to npy files UPMC_Food101/images/train
 # dir = os.path.dirname(__file__)
 # filename = os.path.join(dir, '/relative/path/to/file/you/want')
 # path = "..\\..\\..\\resources\\preprocessed" #change to npy files
@@ -24,10 +24,11 @@ food_names = {} # maps index to food name
 index = 0
 print(os.getcwd())
 for file_name in os.listdir(path):
-    print(file_name)
-    food_map[index] = path + "/" + file_name #string: path of file name
-    food_names[index] = file_name
-    index += 1
+    if ".npy" in file_name:
+        print(file_name)
+        food_map[index] = path + "/" + file_name #string: path of file name
+        food_names[index] = file_name
+        index += 1
 
 print(food_map)
 
@@ -49,15 +50,16 @@ def get_batch(size):
 def random_gen():
     # random category
     cat_index = random.randint(0, len(food_map) - 1)
-    cat_file_name = np.load(food_map[cat_index])
-    cat_file_name = np.reshape(cat_file_name, (cat_file_name.shape[0], -1))
-    # print(cat_file_name.shape)
+    print(cat_index)
+    cat_file = np.load(food_map[cat_index])
+    cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
+    # print(cat_file.shape)
 
     # random image from category
-    img_index = random.randint(0, cat_file_name.shape[0])
+    img_index = random.randint(0, cat_file.shape[0])
 
     #img is in pixels, of size 3*64*64 by 1
-    img = cat_file_name[img_index, :]
+    img = cat_file[img_index, :]
     return img, cat_index
 
 
