@@ -18,32 +18,32 @@ path = "..\\..\\..\\resources\\processed" #change to npy files UPMC_Food101/imag
 # filename = os.path.join(dir, '/relative/path/to/file/you/want')
 # path = "..\\..\\..\\resources\\preprocessed" #change to npy files
 
-food_map = {} #maps index for onehot vector to food file name
+food_map = {} # maps index for onehot vector to food file path
+food_names = {} # maps index to food name
 
-food_path = []
-food_name = []
-
-index=0
+index = 0
 print(os.getcwd())
 for file_name in os.listdir(path):
     print(file_name)
     food_map[index] = path + "/" + file_name #string: path of file name
+    food_names[index] = file_name
     index += 1
 
 print(food_map)
 
 one_hot = np.array([0 for file in os.listdir(path)])
 
-
 def get_batch(size):
+    batch_one_hots = []
     batch = np.zeros((size, 64*64*3))
-    batch_vector = one_hot.copy()
     for i in range(0, size):
+        batch_vector = one_hot.copy()
         img, cat_index = random_gen()
         batch[i] = img
         batch_vector[cat_index] = 1
+        batch_one_hots.append(batch_vector)
 
-    return batch, batch_vector
+    return batch, batch_one_hots
 
 
 def random_gen():
@@ -61,9 +61,11 @@ def random_gen():
     return img, cat_index
 
 
-b, bv = get_batch(30)
+b, boh = get_batch(30)
+print(food_map)
+print(food_names)
 print(b)
-print(bv)
+print(boh)
 
 # {0 : ("apple_pie", __)}
 
