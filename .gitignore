@@ -6,3 +6,6 @@
 *.pyc
 *.zip
 *.tar.gz
+*.pkl
+*.tgz
+*.gz
