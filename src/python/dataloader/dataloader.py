@@ -13,17 +13,27 @@ import random
 # In[9]:
 
 
-path = "./UPMC_Food101/images/train" #change to npy files
+path = "..\\..\\..\\resources\\processed" #change to npy files UPMC_Food101/images/train
+# dir = os.path.dirname(__file__)
+# filename = os.path.join(dir, '/relative/path/to/file/you/want')
+# path = "..\\..\\..\\resources\\preprocessed" #change to npy files
+
 food_map = {} #maps index for onehot vector to food file name
+
+food_path = []
+food_name = []
+
 index=0
+print(os.getcwd())
 for file_name in os.listdir(path):
+    print(file_name)
     food_map[index] = path + "/" + file_name #string: path of file name
     index += 1
-    print(file_name)
 
 print(food_map)
 
 one_hot = np.array([0 for file in os.listdir(path)])
+
 
 def get_batch(size):
     batch = np.zeros((size, 64*64*3))
@@ -38,8 +48,10 @@ def get_batch(size):
 
 def random_gen():
     # random category
-    cat_index = random.randint(0, food_map.size)
+    cat_index = random.randint(0, len(food_map) - 1)
     cat_file_name = np.load(food_map[cat_index])
+    cat_file_name = np.reshape(cat_file_name, (cat_file_name.shape[0], -1))
+    # print(cat_file_name.shape)
 
     # random image from category
     img_index = random.randint(0, cat_file_name.shape[0])
@@ -49,7 +61,10 @@ def random_gen():
     return img, cat_index
 
 
+b, bv = get_batch(30)
+print(b)
+print(bv)
 
+# {0 : ("apple_pie", __)}
 
-
-# In[ ]:
+#matplotlib.show(numpy )
