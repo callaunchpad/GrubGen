@@ -1,22 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[8]:
-
-
 import os
 from os.path import expanduser
 import numpy as np
 import random
+from matplotlib import pyplot as plt
 
-
-# In[9]:
-
-
-path = "../../../resources/processed" #change to npy files UPMC_Food101/images/train
-# dir = os.path.dirname(__file__)
-# filename = os.path.join(dir, '/relative/path/to/file/you/want')
-# path = "..\\..\\..\\resources\\preprocessed" #change to npy files
+path = "../../../resources/processed" # on mac
+# path = "..\\..\\..\\resources\\preprocessed" # on windows
 
 food_map = {} # maps index for onehot vector to food file path
 food_names = {} # maps index to food name
@@ -30,8 +22,6 @@ for file_name in os.listdir(path):
         food_names[index] = file_name
         index += 1
 
-print(food_map)
-
 one_hot = np.array([0 for file in os.listdir(path)])
 
 def get_batch(size):
@@ -43,7 +33,6 @@ def get_batch(size):
         batch[i] = img
         batch_vector[cat_index] = 1
         batch_one_hots.append(batch_vector)
-
     return batch, batch_one_hots
 
 
@@ -53,7 +42,6 @@ def random_gen():
     print(cat_index)
     cat_file = np.load(food_map[cat_index])
     cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
-    # print(cat_file.shape)
 
     # random image from category
     img_index = random.randint(0, cat_file.shape[0])
@@ -62,13 +50,20 @@ def random_gen():
     img = cat_file[img_index, :]
     return img, cat_index
 
+# testing
+# b, boh = get_batch(30)
+# print(food_map)
+# print(food_names)
+# print(b)
+# print(boh)
 
-b, boh = get_batch(30)
-print(food_map)
-print(food_names)
-print(b)
-print(boh)
+# to show images in batch:
+# count = 0
+# for i in b:
+#     img = np.reshape(i, (64, 64, 3))
+#     img /= 255
+#     plt.imshow(img)
+#     count += 1
+#     break
 
-# {0 : ("apple_pie", __)}
-
-#matplotlib.show(numpy )
+# plt.show()
