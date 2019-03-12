@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[21]:
+# In[1]:
 
 
 from PIL import Image
@@ -9,9 +9,12 @@ import glob
 import os
 import numpy as np
 import os
+from PIL import Image
+from resizeimage import resizeimage
+import cv2
 
 
-# In[22]:
+# In[2]:
 
 
 '''
@@ -33,7 +36,7 @@ def create_food_dictionary(main_directory, food_types):
     return food_types
 
 
-# In[23]:
+# In[12]:
 
 
 '''
@@ -46,12 +49,13 @@ def create_stacked_images(img_list):
     final_array = [] 
     for image_path in img_list:
         im=Image.open(image_path)
-        cropped_image = crop(im, 64, 64)
-        final_array.append(rgb(cropped_image, 64, 64)) 
+        cropped_image = crop(im)
+        resized = resize(cropped_image, 64)
+        final_array.append(rgb(resized, 64, 64)) 
     return final_array      
 
 
-# In[24]:
+# In[13]:
 
 
 # returns an array of rgb tuples for one image 
@@ -65,21 +69,74 @@ def rgb(image, width, length):
     return np.array(flattened)
 
 
-# In[25]:
+# In[14]:
+
+
+# def crop(im, new_width, new_height):
+#     width, height = im.size
+#     left = (width - new_width)/2
+#     top = (height - new_height)/2
+#     right = (width + new_width)/2
+#     bottom = (height + new_height)/2
+#     return im.crop((left, top, right, bottom))
+
+
+# In[15]:
 
 
 # takes in an PIL Image object 
 # returns an Image object that is cropped 
-def crop(im, new_width, new_height):
-    width, height = im.size 
-    left = (width - new_width)/2
-    top = (height - new_height)/2
-    right = (width + new_width)/2
-    bottom = (height + new_height)/2
+# crops to square 
+def crop(im):
+    width, height = im.size
+    if width > height: 
+        left = (width - height)/2
+        top = 0
+        right = (width + height)/2
+        bottom = height
+    else: 
+        left = 0
+        top = (height - width)/2
+        right = width
+        bottom = (height + width)/2
     return im.crop((left, top, right, bottom))
 
 
-# In[26]:
+# In[16]:
+
+
+def resize(im, size, padColor=0):
+    desired_size = size
+
+    old_size = im.size  # old_size[0] is in (width, height) format
+
+    ratio = float(desired_size)/max(old_size)
+    new_size = tuple([int(x*ratio) for x in old_size])
+    # use thumbnail() or resize() method to resize the input image
+
+    # thumbnail is a in-place operation
+
+    # im.thumbnail(new_size, Image.ANTIALIAS)
+
+    im = im.resize(new_size, Image.ANTIALIAS)
+    # create a new image and paste the resized on it
+
+    new_im = Image.new("RGB", (desired_size, desired_size))
+    new_im.paste(im, ((desired_size-new_size[0])//2,
+                        (desired_size-new_size[1])//2))
+
+    return new_im
+
+
+# In[18]:
+
+
+# im=Image.open('../../../../testpic.jpg')
+# im = crop(im)
+# resize(im, 64)
+
+
+# In[19]:
 
 
 # take in an array and output it to a numpy file 
@@ -88,7 +145,7 @@ def create_np_file(array, name):
     return
 
 
-# In[27]:
+# In[20]:
 
 
 # creates .npy files for each array in dictionary, saves them in the folder specified by the path to folder param 
@@ -101,6 +158,8 @@ def create_files(food_dict, path_to_folder):
             create_np_file(array, path_to_folder + '/' + key + '.npy')
     return 
 
+
+# # code to run the images
 
 # In[32]:
 
