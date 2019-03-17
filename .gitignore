@@ -1,6 +1,7 @@
 .DS_Store
 *.pem
 *.png
+*.jpg
 *.swp
 *.swo
 *.pyc
@@ -10,3 +11,4 @@
 *.tgz
 *.gz
 *.npy
+*.csv
