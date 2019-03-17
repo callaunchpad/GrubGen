@@ -17,7 +17,7 @@ food_names = {} # maps index to food name
 
 index = 0
 for file_name in os.listdir(path):
-    if ".npy" in file_name:
+    if file_name.endswith(".npy"):
         # print(file_name)
         food_paths[index] = path + "/" + file_name # string: path of file name
         food_names[index] = file_name[0:(len(file_name)-4)]
