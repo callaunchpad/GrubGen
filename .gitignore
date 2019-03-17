@@ -12,3 +12,4 @@
 *.gz
 *.npy
 *.csv
+*.ipynb_checkpoints
