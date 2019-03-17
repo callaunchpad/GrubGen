@@ -88,6 +88,7 @@ def resize(im, size):
 # take in an array and output it to a numpy file 
 def create_np_file(array, name, overwrite=False):
     if overwrite or not os.path.isfile(name): 
+        print(name, "written")
         np.save(name, array)
     else:
         print("Already exists", name, "skipping...")
