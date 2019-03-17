@@ -1,21 +1,19 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 from PIL import Image
 import glob
 import os
 import numpy as np
 import os
 from PIL import Image
-from resizeimage import resizeimage
-import cv2
+
+resources = "..\\..\\..\\resources"
 
 
-# In[2]:
-
+def is_img_name(name):
+    if name.endswith("png"):
+        print("unexpected png, please add feature")
+        1/0
+    return name.endswith("jpg")
 
 '''
 params 
@@ -25,14 +23,27 @@ return
         keys are "baklava" 
         values are "./UPMC_Food101/images/train/baklava/baklava_808.jpg"
 '''
-def create_food_dictionary(main_directory, food_types): 
-    for root, dirs, files in os.walk(main_directory, topdown=False):
-        food_name = root.split('/')[-1] # get the last string of something like "./UPMC_Food101/images/train/baklava"
+def create_food_dictionary(main_directory, food_types):
+    for subdir in os.listdir(main_directory):
+        food_name = subdir
         if food_name not in food_types:
             food_types[food_name] = []
-        for root2, dirs, files in os.walk(root, topdown=False):
-            for name in files:
-                food_types[food_name].append(os.path.join(root2, name))
+        for food_img_path in os.listdir(os.path.join(main_directory, food_name)):
+            # print(food_img_path, is_img_name(food_img_path))
+            if is_img_name(food_img_path):
+                food_types[food_name].append(os.path.join(main_directory, food_name, food_img_path))
+    # print(subdirs)
+
+    # for root, dirs, files in os.walk(main_directory, topdown=False):
+    #     food_name = root.split('\\')[-1] # get the last string of something like "./UPMC_Food101/images/train/baklava"
+    #     print("lit", dirs, root, food_name)
+    #     if food_name not in food_types:
+    #         food_types[food_name] = []
+    #     for root2, dirs, files in os.walk(root, topdown=False):
+    #         for name in files:
+    #             # print(name, is_img_name(name))
+    #             if is_img_name(name):
+    #                 food_types[food_name].append(os.path.join(root2, name))
     return food_types
 
 
@@ -45,31 +56,26 @@ params
 returns 
     all the images in that list stacked. Each row is a flattened image that contains (R,G,B)
 '''
-def create_stacked_images(img_list): 
+def create_stacked_images(img_list, size=64): 
     final_array = [] 
     for image_path in img_list:
-        im=Image.open(image_path)
+        im = Image.open(image_path)
         cropped_image = crop(im)
-        resized = resize(cropped_image, 64)
-        final_array.append(rgb(resized, 64, 64)) 
-    return final_array      
-
-
-# In[13]:
-
+        resized = resize(cropped_image, size)
+        # print(resized.size)
+        final_array.append(np.array(resized)) 
+    return np.stack(final_array)      
 
 # returns an array of rgb tuples for one image 
 # returns the flattened image
 def rgb(image, width, length):
+    1/0 #don't use this
     flattened = []
     for i in range(width): 
         for j in range(length):
             new = image.load()[i, j]
             flattened.append(new)
     return np.array(flattened)
-
-
-# In[14]:
 
 
 # def crop(im, new_width, new_height):
@@ -81,24 +87,21 @@ def rgb(image, width, length):
 #     return im.crop((left, top, right, bottom))
 
 
-# In[15]:
-
-
 # takes in an PIL Image object 
 # returns an Image object that is cropped 
 # crops to square 
 def crop(im):
     width, height = im.size
     if width > height: 
-        left = (width - height)/2
+        left = (width - height)//2
         top = 0
-        right = (width + height)/2
+        right = (width + height)//2
         bottom = height
     else: 
         left = 0
-        top = (height - width)/2
+        top = (height - width)//2
         right = width
-        bottom = (height + width)/2
+        bottom = (height + width)//2
     return im.crop((left, top, right, bottom))
 
 
@@ -106,29 +109,30 @@ def crop(im):
 
 
 def resize(im, size, padColor=0):
-    desired_size = size
+    # print(im.size)
+    # desired_size = size
 
-    old_size = im.size  # old_size[0] is in (width, height) format
+    # old_size = im.size  # old_size[0] is in (width, height) format
+    assert im.size[0] == im.size[1]
 
-    ratio = float(desired_size)/max(old_size)
-    new_size = tuple([int(x*ratio) for x in old_size])
+    # ratio = float(desired_size)/max(old_size)
+    # new_size = tuple([int(x*ratio) for x in old_size])
     # use thumbnail() or resize() method to resize the input image
 
     # thumbnail is a in-place operation
 
     # im.thumbnail(new_size, Image.ANTIALIAS)
 
-    im = im.resize(new_size, Image.ANTIALIAS)
+    # im = im.resize(new_size, Image.ANTIALIAS)
     # create a new image and paste the resized on it
 
-    new_im = Image.new("RGB", (desired_size, desired_size))
-    new_im.paste(im, ((desired_size-new_size[0])//2,
-                        (desired_size-new_size[1])//2))
-
-    return new_im
-
-
-# In[18]:
+    # new_im = Image.new("RGB", (desired_size, desired_size))
+    # new_im.paste(im, ((desired_size-new_size[0])//2,
+    #                     (desired_size-new_size[1])//2))
+    
+    im = im.resize((size, size), Image.ANTIALIAS)
+    # print(im.size)
+    return im
 
 
 # im=Image.open('../../../../testpic.jpg')
@@ -136,27 +140,27 @@ def resize(im, size, padColor=0):
 # resize(im, 64)
 
 
-# In[19]:
-
-
 # take in an array and output it to a numpy file 
-def create_np_file(array, name):
-    np.save(name, array)
-    return
-
-
-# In[20]:
-
+def create_np_file(array, name, overwrite=False):
+    if overwrite or not os.path.isfile(name): 
+        np.save(name, array)
 
 # creates .npy files for each array in dictionary, saves them in the folder specified by the path to folder param 
 # saving in folder "food_lists" = './food_lists'
 # takes care of cropping of all the images specified in the dictionary 
-def create_files(food_dict, path_to_folder): 
-    for key, value in food_dict.items():
-        array = create_stacked_images(food_dict[key])
-        if not os.path.isfile(path_to_folder + '/' + key + '.npy'): 
-            create_np_file(array, path_to_folder + '/' + key + '.npy')
-    return 
+def create_files(food_dict, path_to_folder, size = 64): 
+    for key, food_dir_list in food_dict.items():
+        # print(key, food_dir_list, food_dict[key])
+        # print(key, len(food_dir_list))
+        if len(food_dir_list) < 1:
+            continue
+        # print(food_dir_list[0])
+        # print(path_to_folder)
+        array = create_stacked_images(food_dir_list, size)
+        print(array.shape)
+        # array = np.array([3])
+        # print("done")
+        create_np_file(array, path_to_folder + '\\' + key + '.npy', True)
 
 
 # # code to run the images
@@ -165,14 +169,14 @@ def create_files(food_dict, path_to_folder):
 
 
 final_food_dict = {} 
-final_food_dict = create_food_dictionary("../../../resources/images/train", final_food_dict) 
-final_food_dict = create_food_dictionary("../../../resources/images/test", final_food_dict)
+final_food_dict = create_food_dictionary(resources + "\\images\\train", final_food_dict) 
+final_food_dict = create_food_dictionary(resources + "\\images\\test", final_food_dict)
 
 
 # In[36]:
 
-
-create_files(final_food_dict, '../../../resources/processed')
+# print(final_food_dict.keys())
+create_files(final_food_dict, "..\\..\\..\\resources\\processed", 64)
 
 
 # In[63]:
