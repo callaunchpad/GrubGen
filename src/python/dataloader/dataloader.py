@@ -2,13 +2,12 @@
 # coding: utf-8
 
 import os
-from os.path import expanduser
 import numpy as np
 import random
 from matplotlib import pyplot as plt
 
-path = "../../../resources/processed" # on mac
-# path = "..\\..\\..\\resources\\preprocessed" # on windows
+resources = "../../../resources"
+path = resources + "/processed"
 
 food_paths = {} # maps index for onehot vector to food file path
 food_names = {} # maps index to food name
@@ -57,19 +56,19 @@ def random_gen():
     return img, cat_index
 
 # testing
-# b, boh = get_batch(30)
+b, boh = get_batch(30)
 # print(food_paths)
 # print(food_names)
 # print(b)
 # print(boh)
 #
 # to show images in batch:
-# count = 0
-# for i in b:
-#     img = np.reshape(i, (64, 64, 3))
-#     img /= 255
-#     plt.imshow(img)
-#     count += 1
-#     break
-#
-# plt.show()
+count = 0
+for i in b:
+    img = np.reshape(i, (64, 64, 3))
+    img /= 255
+    plt.imshow(img)
+    count += 1
+    break
+
+plt.show()

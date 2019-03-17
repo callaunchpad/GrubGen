@@ -6,7 +6,7 @@ import numpy as np
 import os
 from PIL import Image
 
-resources = "..\\..\\..\\resources"
+resources = "../../../resources"
 
 
 def is_img_name(name):
@@ -40,7 +40,7 @@ params
 returns 
     all the images in that list stacked. Each row is a flattened image that contains (R,G,B)
 '''
-def create_stacked_images(img_list, size=64): 
+def create_stacked_images(img_list, size): 
     final_array = [] 
     for image_path in img_list:
         im = Image.open(image_path)
@@ -80,7 +80,7 @@ def crop(im):
     return im
 
 
-def resize(im, size, padColor=0):
+def resize(im, size):
     im = im.resize((size, size), Image.ANTIALIAS)
     return im
 
@@ -95,24 +95,31 @@ def create_np_file(array, name, overwrite=False):
 # creates .npy files for each array in dictionary, saves them in the folder specified by the path to folder param 
 # saving in folder "food_lists" = './food_lists'
 # takes care of cropping of all the images specified in the dictionary 
-def create_files(food_dict, path_to_folder, size = 64): 
+def create_files(food_dict, path_to_folder, size, overwrite): 
     for key, food_dir_list in food_dict.items():
         if len(food_dir_list) < 1:
             continue
         array = create_stacked_images(food_dir_list, size)
-        create_np_file(array, path_to_folder + '\\' + key + '.npy')
+        create_np_file(array, path_to_folder + '/' + key + '.npy', overwrite)
 
 if __name__ == '__main__':
     import sys
-    assert len(sys.argv) < 3
-    if len(sys.argv) == 2:
+    assert len(sys.argv) < 4
+    size = 64
+    overwrite = False
+    if len(sys.argv) > 1:
         size = int(sys.argv[1])
+    if len(sys.argv) == 3:
+        assert sys.argv[2] =='0' or sys.argv[2] =='1'
+        overwrite = bool(sys.argv[2])
+        if overwrite:
+            print("Overwrite flag on")
 
     final_food_dict = {} 
-    final_food_dict = create_food_dictionary(resources + "\\images\\train", final_food_dict) 
-    final_food_dict = create_food_dictionary(resources + "\\images\\test", final_food_dict)
+    final_food_dict = create_food_dictionary(resources + "/images/train", final_food_dict) 
+    final_food_dict = create_food_dictionary(resources + "/images/test", final_food_dict)
 
-    create_files(final_food_dict, resources + "\\processed", size)
+    create_files(final_food_dict, resources + "/processed", size, overwrite)
 
 
 
