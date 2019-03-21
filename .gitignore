@@ -1,8 +1,15 @@
 .DS_Store
 *.pem
 *.png
+*.jpg
 *.swp
 *.swo
 *.pyc
 *.zip
 *.tar.gz
+*.pkl
+*.tgz
+*.gz
+*.npy
+*.csv
+*.ipynb_checkpoints
