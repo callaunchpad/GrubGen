@@ -18,12 +18,12 @@ digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
     for i in y_train:
-        one = [0 for i in range(10)]
+        one = [0 for j in range(10)]
         one[i] = 1
         res += [one]
     return res
 
-y_train = one_hot(y_train)[:200]
+y_train = one_hot(y_train)[:5000]
 
 ### GAN section
 
@@ -116,7 +116,7 @@ with tf.Session() as sess:
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
         print("Finished Epoch", epoch)
-        oz = np.array([random.randint(0,10)])
+        oz = np.array([random.randint(0,9)])
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
