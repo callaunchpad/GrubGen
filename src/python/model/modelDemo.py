@@ -121,7 +121,7 @@ with tf.Session() as sess:
         samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
 
-plt.imshow(samples[0].reshape(28,28))
-plt.show()
-plt.imshow(samples[epochs-1].reshape(28,28))
-plt.show()
+plt.imsave('sample0.png', (samples[0].reshape(64,64)))
+#plt.show()
+plt.imsave('finalSample.png', samples[epochs-1].reshape(64,64))
+#plt.show()
