@@ -21,7 +21,11 @@ def one_hot(y_train):
         res += [one]
     return res
 
+<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
 y_train = one_hot(y_train)[:200]
+=======
+y_train = one_hot(y_train)[:60000]
+>>>>>>> 4e03a1881c874a8b06e4e05625a238e78969ebd8:src/python/model/modelDemo.py
 
 ### GAN section
 
@@ -101,7 +105,7 @@ dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=10
+epochs=20
 
 init=tf.global_variables_initializer()
 samples = []

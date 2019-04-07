@@ -2,34 +2,36 @@
 # coding: utf-8
 
 import os
-from os.path import expanduser
 import numpy as np
 import random
 from matplotlib import pyplot as plt
 
-path = "../../../resources/processed" # on mac
-# path = "..\\..\\..\\resources\\preprocessed" # on windows
+resources = "../../../resources"
+path = resources + "/processed"
 
-food_paths = {} # maps index for onehot vector to food file path
-food_names = {} # maps index to food name
+food_paths = [] # maps index for onehot vector to food file path
+food_names = [] # maps index to food name
 
 # print("current working directory:")
 # print(os.getcwd())
 
-index = 0
-for file_name in os.listdir(path):
-    if ".npy" in file_name:
-        # print(file_name)
-        food_paths[index] = path + "/" + file_name # string: path of file name
-        food_names[index] = file_name[0:(len(file_name)-4)]
-        index += 1
+def load_files():
+    index = 0
+    for file_name in os.listdir(path):
+        if file_name.endswith(".npy"):
+            # print(file_name)
+            food_paths.append(path + "/" + file_name) # string: path of file name
+            food_names.append(file_name[0:(len(file_name)-4)])
+    print(food_paths)
+    print(food_names)
 
 # print("FOOD PATHS:")
 # print(food_paths)
 # print("FOOD NAMES:")
 # print(food_names)
 
-one_hot = np.array([0 for file in os.listdir(path)])
+# one_hot = np.array([0 for file in os.listdir(path)])
+one_hot = np.zeros(len(os.listdir(path))).astype(np.int)
 
 def get_batch_type(size, one_hot):
     batch = np.zeros((size, 64*64*3))
@@ -54,7 +56,12 @@ def get_batch(size):
 
 def random_gen():
     # random category
+<<<<<<< HEAD
     cat_index = random.randint(len(food_paths)-1)
+=======
+    cat_index = random.randint(0, len(food_paths) - 1)
+    # print(cat_index)
+>>>>>>> 4e03a1881c874a8b06e4e05625a238e78969ebd8
     cat_file = np.load(food_paths[cat_index])
     cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
 
@@ -65,20 +72,23 @@ def random_gen():
     img = cat_file[img_index, :]
     return img, cat_index
 
-# testing
-# b, boh = get_batch(30)
-# print(food_paths)
-# print(food_names)
-# print(b)
-# print(boh)
-#
-# to show images in batch:
-# count = 0
-# for i in b:
-#     img = np.reshape(i, (64, 64, 3))
-#     img /= 255
-#     plt.imshow(img)
-#     count += 1
-#     break
-#
-# plt.show()
+
+if __name__ == '__main__':
+    load_files()
+    # testing
+    print(one_hot)
+    b, boh = get_batch(30)
+    # print(food_paths)
+    # print(food_names)
+    # print(b)
+    # print(boh)
+    #
+    # to show images in batch:
+    count = 0
+    for i in b:
+        img = np.reshape(i, (64, 64, 3))
+        img /= 255
+        plt.imshow(img)
+        count += 1
+
+        plt.show()
