@@ -31,6 +31,16 @@ for file_name in os.listdir(path):
 
 one_hot = np.array([0 for file in os.listdir(path)])
 
+def get_batch_type(size, one_hot):
+    batch = np.zeros((size, 64*64*3))
+    for i in range
+
+def get_batch_type(one_hot):
+    size =
+    return get_batch_type(size,one_hot)
+
+
+
 def get_batch(size):
     batch_one_hots = []
     batch = np.zeros((size, 64*64*3))
@@ -44,8 +54,7 @@ def get_batch(size):
 
 def random_gen():
     # random category
-    cat_index = random.randint(0, len(food_paths) - 1)
-    print(cat_index)
+    cat_index = random.randint(len(food_paths)-1)
     cat_file = np.load(food_paths[cat_index])
     cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
 

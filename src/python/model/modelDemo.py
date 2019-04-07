@@ -5,25 +5,23 @@ import matplotlib
 import sys
 import scipy
 import random
-#from .dataloader.dataloader import get_batch
+#from ../dataloader.dataloader import get_batch
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-#x_train = tf.image.resize_images(x_train,[64, 64]).eval()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-#x_test = tf.image.resize_images(x_test,[64, 64]).eval()
 batch_size=100
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
     for i in y_train:
-        one = [0 for j in range(10)]
+        one = [0 for i in range(10)]
         one[i] = 1
         res += [one]
     return res
 
-y_train = one_hot(y_train)[:5000]
+y_train = one_hot(y_train)[:200]
 
 ### GAN section
 
@@ -48,17 +46,21 @@ def generator(inp, y, reuse=None):
         output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
         return output
 
+# instead of putting y in discriminator, feed in vectorized real_images
 
 
 
-def discriminator(inp, y, reuse=None):
+
+def discriminator(gen_inp, img_inp, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1_im = tf.layers.conv2d(inp,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden1_im = tf.layers.conv2d(gen_inp,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
         hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
+        #flatten here
+        hidden2_pool = tf.layers.flatten(hidden2_pool)
         output_im = tf.layers.dense(inputs=hidden2_pool, units=128, activation=tf.nn.leaky_relu)
-        hidden1_y = tf.layers.dense(inputs=y, units=128, activation=tf.nn.leaky_relu)
+        hidden1_y = tf.layers.dense(inputs=img_inp, units=128, activation=tf.nn.leaky_relu)
         output_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
 
         dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
@@ -116,12 +118,12 @@ with tf.Session() as sess:
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
         print("Finished Epoch", epoch)
-        oz = np.array([random.randint(0,9)])
+        oz = np.array([random.randint(0,10)])
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
 
-plt.imsave('sample0.png', (samples[0].reshape(64,64)))
-#plt.show()
-plt.imsave('finalSample.png', samples[epochs-1].reshape(64,64))
-#plt.show()
+plt.imshow(samples[0].reshape(28,28))
+plt.show()
+plt.imshow(samples[epochs-1].reshape(28,28))
+plt.show()
