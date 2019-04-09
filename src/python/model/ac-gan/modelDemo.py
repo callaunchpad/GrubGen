@@ -21,12 +21,7 @@ def one_hot(y_train):
         res += [one]
     return res
 
-<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
-y_train = one_hot(y_train)[:200]
-=======
 y_train = one_hot(y_train)[:60000]
->>>>>>> 4e03a1881c874a8b06e4e05625a238e78969ebd8:src/python/model/modelDemo.py
-
 ### GAN section
 
 def generator(inp, y, reuse=None):
@@ -105,7 +100,7 @@ dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=20
+epochs=5
 
 init=tf.global_variables_initializer()
 samples = []
@@ -114,6 +109,8 @@ with tf.Session() as sess:
 
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
+        ld = 0
+        lg = 0
         for i in range(num_batches):
             print("Epoch ", epoch, "; batch #", i, "out of", num_batches)
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
@@ -121,13 +118,20 @@ with tf.Session() as sess:
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            ld += sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            lg += sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
         print("Finished Epoch", epoch)
-        oz = np.array([random.randint(0,10)])
+        print("Generator Loss:", lg/num_batches)
+        print("Discriminator Loss:", ld/num_batches)
+        oz = np.array([random.randint(0,9)])
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
 
-plt.imshow(samples[0].reshape(28,28))
-plt.show()
-plt.imshow(samples[epochs-1].reshape(28,28))
-plt.show()
+
+np.save('samples', np.array(samples))
+
+#plt.imshow(samples[0].reshape(28,28))
+#plt.show()
+#plt.imshow(samples[epochs-1].reshape(28,28))
+#plt.show()
