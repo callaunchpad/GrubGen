@@ -1,7 +1,7 @@
 import tensorflow as tf
 import time
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
