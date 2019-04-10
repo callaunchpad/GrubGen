@@ -18,44 +18,33 @@ channels = 3
 
 def generator(z, reuse=None):
 	with tf.variable_scope('gen',reuse=reuse):
+		""" This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels. """
+
+
 		keep_prob=0.6
 		momentum = 0.99
-		# is_training=True
-		# activation=tf.nn.leaky_relu
-		#hidden=tf.layers.dense(inputs=z,units=4*4*1,activation=tf.nn.leaky_relu)
-		#reshape1 = tf.reshape(batch_norm, shape=[-1, 4, 4, 1])
-		#full_reshape = tf.image.resize_images(reshape1, size=[7, 7])
+		#is_training=True
 		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=512, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
-		#dropout_1=tf.layers.dropout(hidden1, rate=keep_prob)
 		batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
 		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
-		#dropout_2=tf.layers.dropout(hidden2, rate=keep_prob)
 		batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
 		hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=[4,4], filters=128, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
-		#dropout_3=tf.layers.dropout(hidden3, rate=keep_prob)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
 		hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=64, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
-		#dropout_4=tf.layers.dropout(hidden4, rate=keep_prob)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
 		output=tf.layers.conv2d_transpose(inputs=batch_norm4, kernel_size=[4,4], filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
 		return output
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
     	momentum = 0.9
-    	X = tf.reshape(X, shape=[-1, 64, 64, channels])
-    	hidden1=tf.layers.conv2d(inputs=X, kernel_size=3, filters=128, strides=2, padding='same', activation=tf.nn.leaky_relu)
-    	#dropout_1= tf.layers.dropout(inputs=hidden1, rate=0.2)
+    	#X = tf.reshape(X, shape=[-1, 64, 64, channels])
+    	hidden1=tf.layers.conv2d(inputs=X, kernel_size=4, filters=128, strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
-    	hidden2=tf.layers.conv2d(inputs=batch_norm1, kernel_size=3, filters=256,strides=2, padding='same', activation=tf.nn.leaky_relu)
-    	#dropout_2= tf.layers.dropout(inputs=hidden2, rate=0.2)
+    	hidden2=tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=256,strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
-    	hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=3, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
-    	#dropout_3= tf.layers.dropout(inputs=hidden3, rate=0.2)
+    	hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
-    	# x_flat = tf.contrib.layers.flatten(batch_norm3)
-    	# pre_output=tf.layers.dense(x_flat, units=1, activation=tf.nn.leaky_relu)
-    	#hidden4=tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
-    	#batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)    	
+    	#x_flat = tf.contrib.layers.flatten(batch_norm3)  	
     	logits=tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
     	output=tf.sigmoid(logits)
     	return output, logits
@@ -78,7 +67,7 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.002
+lr = 0.001
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -88,9 +77,9 @@ D_trainer=tf.train.AdamOptimizer(lr).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
 
-num_batches=20
-batch_size=100
-epochs=20
+num_batches=30
+batch_size=200
+epochs=40
 init=tf.global_variables_initializer()
 
 gen_samples=[]
