@@ -7,6 +7,7 @@ import scipy
 import random
 #from ../dataloader.dataloader import get_batch
 matplotlib.use('TkAgg')
+#matplotlib.use('GTK3Agg')
 import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
@@ -21,7 +22,7 @@ def one_hot(y_train):
         res += [one]
     return res
 
-y_train = one_hot(y_train)[:60000]
+y_train = one_hot(y_train)[:5000]
 ### GAN section
 
 def generator(inp, y, reuse=None):
@@ -100,10 +101,12 @@ dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=5
+epochs=1
 
 init=tf.global_variables_initializer()
 samples = []
+lossds = []
+lossgs = []
 with tf.Session() as sess:
     sess.run(init)
 
@@ -111,6 +114,8 @@ with tf.Session() as sess:
         num_batches = len(y_train)//batch_size
         ld = 0
         lg = 0
+        dcounter = 0
+        dcounter = 0
         for i in range(num_batches):
             print("Epoch ", epoch, "; batch #", i, "out of", num_batches)
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
@@ -121,8 +126,10 @@ with tf.Session() as sess:
             ld += sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             lg += sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
         print("Finished Epoch", epoch)
-        print("Generator Loss:", lg/num_batches)
-        print("Discriminator Loss:", ld/num_batches)
+        print("Generator Loss:", lg)
+        print("Discriminator Loss:", ld)
+        lossgs.append(lg)
+        lossds.append(ld)
         oz = np.array([random.randint(0,9)])
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(1,100))
@@ -130,8 +137,10 @@ with tf.Session() as sess:
 
 
 np.save('samples', np.array(samples))
+np.save('discLoss', np.array(lossds))
+np.save('genLoss', np.array(lossgs))
 
-#plt.imshow(samples[0].reshape(28,28))
-#plt.show()
-#plt.imshow(samples[epochs-1].reshape(28,28))
-#plt.show()
+plt.imshow(samples[0].reshape(64,64))
+plt.show()
+plt.imshow(samples[epochs-1].reshape(64,64))
+plt.show()
