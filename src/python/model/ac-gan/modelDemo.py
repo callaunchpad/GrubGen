@@ -100,11 +100,11 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr/40).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=5
+epochs=20
 
 init=tf.global_variables_initializer()
 samples = []
@@ -138,7 +138,7 @@ with tf.Session() as sess:
                 _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             if (True):
                 _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+                #_=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             ld += d1/num_batches
             lg += g1/num_batches
         print("Finished Epoch", epoch)
@@ -150,11 +150,11 @@ with tf.Session() as sess:
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
+        np.save('samples3', np.array(samples))
+        np.save('discLoss3', np.array(lossds))
+        np.save('genLoss3', np.array(lossgs))
 
 
-np.save('samples2', np.array(samples))
-np.save('discLoss2', np.array(lossds))
-np.save('genLoss2', np.array(lossgs))
 
 plt.imshow(samples[0].reshape(64,64))
 plt.show()
