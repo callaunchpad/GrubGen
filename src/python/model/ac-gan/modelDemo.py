@@ -22,7 +22,7 @@ def one_hot(y_train):
         res += [one]
     return res
 
-y_train = one_hot(y_train)[:5000]
+y_train = one_hot(y_train)[:60000]
 ### GAN section
 
 def generator(inp, y, reuse=None):
@@ -40,10 +40,13 @@ def generator(inp, y, reuse=None):
 
 
 
-        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
-        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-        conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=128, strides=(2,2), padding='same')
-        output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
+        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=2048, strides=(1,1),padding='valid')
+        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=1024, strides=(1,1), padding='valid')
+        conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=512, strides=(1,1), padding='valid')
+        
+        conv4 = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
+        conv5 = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=128, strides=(2,2), padding='same')
+        output = tf.layers.conv2d_transpose(conv4, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
         return output
 
 # instead of putting y in discriminator, feed in vectorized real_images
@@ -97,11 +100,11 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr/40).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=1
+epochs=5
 
 init=tf.global_variables_initializer()
 samples = []
@@ -109,7 +112,7 @@ lossds = []
 lossgs = []
 with tf.Session() as sess:
     sess.run(init)
-
+    print("STARTING")
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
         ld = 0
@@ -117,14 +120,26 @@ with tf.Session() as sess:
         dcounter = 0
         dcounter = 0
         for i in range(num_batches):
-            print("Epoch ", epoch, "; batch #", i, "out of", num_batches)
+            
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
 
+            
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
-            _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            ld += sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            lg += sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            d1= sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            g1= sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            tg = True
+            td = True
+            if (g1 > d1*2):
+                td = False
+            if (d1 > g1*2):
+                tg = False
+            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "discBatchLoss:",d1, "genBatchLoss:", g1, "Training Discriminator:", td, "Training Generator:", True)
+            if (td):
+                _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            if (True):
+                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            ld += d1/batch_size
+            lg += g1/batch_size
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
         print("Discriminator Loss:", ld)
