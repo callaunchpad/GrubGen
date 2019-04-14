@@ -31,17 +31,11 @@ def generator(inp, y, reuse=None):
         hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_im = tf.layers.dense(inputs=hidden1_im, units=128, activation=tf.nn.leaky_relu)
         output_im = tf.layers.dense(inputs=hidden2_im, units=784, activation=tf.nn.leaky_relu)
-<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
-        hidden1_y = tf.layers.dense(inputs=y, units=128, activation=tf.nn.leaky_relu)
-        hidden2_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
-        output_y = tf.layers.dense(inputs=hidden2_y, units=784, activation=tf.nn.leaky_relu)
-=======
         hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
         hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
         hidden3_y = tf.layers.dense(inputs=hidden2_y, units=512, activation=tf.nn.leaky_relu)
         
         output_y = tf.layers.dense(inputs=hidden3_y, units=256, activation=tf.nn.leaky_relu)
->>>>>>> a462d49694cd90faa023191b6497527532c9e078:src/python/model/ac-gan/ACGAN.py
         concat = tf.concat([output_im, output_y], 1)
         concat_dense = tf.layers.dense(inputs=concat, units=4*4*1024, activation = tf.nn.leaky_relu)
         preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
@@ -59,37 +53,23 @@ def generator(inp, y, reuse=None):
 
 
 
-def discriminator(gen_inp, img_inp, reuse=None):
+def discriminator(img, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1_im = tf.layers.conv2d(gen_inp,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
         hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
-        #flatten here
         hidden2_pool = tf.layers.flatten(hidden2_pool)
-        output_im = tf.layers.dense(inputs=hidden2_pool, units=128, activation=tf.nn.leaky_relu)
-<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
-        hidden1_y = tf.layers.dense(inputs=img_inp, units=128, activation=tf.nn.leaky_relu)
-        output_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
-=======
-        hidden1_y = tf.layers.dense(inputs=img_inp, units=256, activation=tf.nn.leaky_relu)
-        hidden2_y = tf.layers.dense(inputs=hidden1_y, units = 256, activation = tf.nn.leaky_relu)
-        hidden3_y = tf.layers.dense(inputs=hidden2_y, units = 256, activation = tf.nn.leaky_relu)
-        
-        output_y = tf.layers.dense(inputs=hidden3_y, units=128, activation=tf.nn.leaky_relu)
->>>>>>> a462d49694cd90faa023191b6497527532c9e078:src/python/model/ac-gan/ACGAN.py
+        output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
 
         dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
-        dense_1 = tf.layers.dense(inputs=dense_0, units=10, activation=tf.nn.leaky_relu)
-        flatten_1 = tf.layers.flatten(dense_1)
-
-        concat = tf.concat([flatten_1, output_y], 1)
-        dense_2 = tf.layers.dense(inputs=concat, units=256, activation=tf.nn.leaky_relu)
-        dense_3 = tf.layers.dense(inputs=dense_2, units=256, activation=tf.nn.leaky_relu)
         
-        logits = tf.layers.dense(dense_3, units=1)
+        logits = tf.layers.dense(dense_0, units=1)
         output = tf.sigmoid(logits)
-        return logits, output
+
+        classes_logits = tf.layers.dense(dense_0, units=10)
+        classes_output = tf.sigmoid(classes_logits)
+        return logits, output, classes_output
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, 1])
 z = tf.placeholder(tf.float32, shape=[None, 100])
@@ -97,17 +77,19 @@ y1 = tf.placeholder(tf.float32, shape=[None, 10])
 y2 = tf.placeholder(tf.float32, shape=[None, 10])
 y3 = tf.placeholder(tf.float32, shape=[None, 10])
 g = generator(z, y1)
-dreallog, drealout = discriminator(real_images, y2)
-dfakelog, dfakeout = discriminator(g, y3, reuse=True)
+dreallog, drealout, drealclasses = discriminator(real_images)
+dfakelog, dfakeout, dfakeclasses = discriminator(g, reuse=True)
 
 def loss_func(logits, labels):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
 
 drealloss = loss_func(dreallog, tf.ones_like(dreallog)*0.9)
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
-dloss = drealloss + dfakeloss
+drealclassloss = loss_func(drealclasses, y2)
+dfakeclassloss = loss_func(dfakeclasses, y1)
+dloss = drealloss + dfakeloss + drealclassloss + dfakeclassloss
 
-gloss = loss_func(dfakelog, tf.ones_like(dfakelog))
+gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss
 
 lr = 0.001
 
