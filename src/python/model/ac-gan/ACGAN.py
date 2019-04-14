@@ -136,9 +136,9 @@ with tf.Session() as sess:
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
 
 
-np.save('samples', np.array(samples))
-np.save('discLoss', np.array(lossds))
-np.save('genLoss', np.array(lossgs))
+np.save('ACGAN_data/samples', np.array(samples))
+np.save('ACGAN_data/discLoss', np.array(lossds))
+np.save('ACGAN_data/genLoss', np.array(lossgs))
 
 plt.imshow(samples[0].reshape(64,64))
 plt.show()
