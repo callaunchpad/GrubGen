@@ -31,11 +31,11 @@ def generator(inp, y, reuse=None):
         hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_im = tf.layers.dense(inputs=hidden1_im, units=128, activation=tf.nn.leaky_relu)
         output_im = tf.layers.dense(inputs=hidden2_im, units=784, activation=tf.nn.leaky_relu)
-        hidden1_y = tf.layers.dense(inputs=y, units=128, activation=tf.nn.leaky_relu)
-        hidden2_y = tf.layers.dense(inputs=hidden1_y, units=512, activation=tf.nn.leaky_relu)
-        hidden3_y = tf.layers.dense(inputs=hidden2_y, units=784, activation=tf.nn.leaky_relu)
+        hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
+        hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
+        hidden3_y = tf.layers.dense(inputs=hidden2_y, units=512, activation=tf.nn.leaky_relu)
         
-        output_y = tf.layers.dense(inputs=hidden3_y, units=784, activation=tf.nn.leaky_relu)
+        output_y = tf.layers.dense(inputs=hidden3_y, units=256, activation=tf.nn.leaky_relu)
         concat = tf.concat([output_im, output_y], 1)
         concat_dense = tf.layers.dense(inputs=concat, units=4*4*1024, activation = tf.nn.leaky_relu)
         preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
@@ -67,15 +67,19 @@ def discriminator(gen_inp, img_inp, reuse=None):
         output_im = tf.layers.dense(inputs=hidden2_pool, units=128, activation=tf.nn.leaky_relu)
         hidden1_y = tf.layers.dense(inputs=img_inp, units=256, activation=tf.nn.leaky_relu)
         hidden2_y = tf.layers.dense(inputs=hidden1_y, units = 256, activation = tf.nn.leaky_relu)
-        output_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
+        hidden3_y = tf.layers.dense(inputs=hidden2_y, units = 256, activation = tf.nn.leaky_relu)
+        
+        output_y = tf.layers.dense(inputs=hidden3_y, units=128, activation=tf.nn.leaky_relu)
 
         dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
         dense_1 = tf.layers.dense(inputs=dense_0, units=10, activation=tf.nn.leaky_relu)
         flatten_1 = tf.layers.flatten(dense_1)
 
         concat = tf.concat([flatten_1, output_y], 1)
-        dense_2 = tf.layers.dense(inputs=concat, units=64, activation=tf.nn.leaky_relu)
-        logits = tf.layers.dense(dense_2, units=1)
+        dense_2 = tf.layers.dense(inputs=concat, units=256, activation=tf.nn.leaky_relu)
+        dense_3 = tf.layers.dense(inputs=dense_2, units=256, activation=tf.nn.leaky_relu)
+        
+        logits = tf.layers.dense(dense_3, units=1)
         output = tf.sigmoid(logits)
         return logits, output
 
@@ -155,9 +159,9 @@ with tf.Session() as sess:
         oz = one_hot(np.array(oz))
         samplez=np.random.uniform(-1,1,size=(10,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('samples3', np.array(samples))
-        np.save('discLoss3', np.array(lossds))
-        np.save('genLoss3', np.array(lossgs))
+        np.save('CGAN_data/samples3', np.array(samples))
+        np.save('CGAN_data/discLoss3', np.array(lossds))
+        np.save('CGAN_data/genLoss3', np.array(lossgs))
 
 
 
