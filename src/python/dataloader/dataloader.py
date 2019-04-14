@@ -60,7 +60,7 @@ def get_batch(size):
 
 def random_gen():
     # random category
-    cat_index = random.randint(len(food_paths)-1)
+    cat_index = random.randint(0, len(food_paths)-1)
     cat_file = np.load(food_paths[cat_index])
     cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
 
