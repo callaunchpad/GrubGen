@@ -76,7 +76,7 @@ if __name__ == '__main__':
     load_files()
     # testing
     print(one_hot)
-    b, boh = get_batch(30)ß
+    b, boh = get_batch(30)
     # to show images in batch:
     count = 0
     for i in b:
