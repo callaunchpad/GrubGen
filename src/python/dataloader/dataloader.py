@@ -34,7 +34,7 @@ def load_files():
 one_hot = np.zeros(len(os.listdir(path))).astype(np.int)
 
 def get_batch_type(size, one_hot):
-    cat_ind4x = one_hot.index(1)
+    cat_index = one_hot.index(1)
     batch_one_hots = []
     cat_file = np.load(food_paths[cat_index])
     batch = np.zeros((size, 64*64*3))
@@ -76,12 +76,7 @@ if __name__ == '__main__':
     load_files()
     # testing
     print(one_hot)
-    b, boh = get_batch(30)
-    # print(food_paths)
-    # print(food_names)
-    # print(b)
-    # print(boh)
-    #
+    b, boh = get_batch(30)ß
     # to show images in batch:
     count = 0
     for i in b:
