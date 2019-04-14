@@ -2,4 +2,4 @@
 
 cd src/python/preprocessor
 
-python preprocessor.py 64 1
+python3 preprocessor.py 64 1
