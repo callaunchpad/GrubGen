@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=100
+batch_size=200
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
@@ -22,7 +22,7 @@ def one_hot(y_train):
         res += [one]
     return res
 
-y_train = one_hot(y_train)[:5000]
+y_train = one_hot(y_train)[:60000]
 ### GAN section
 
 def generator(inp, y, reuse=None):
@@ -101,7 +101,7 @@ dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
-epochs=1
+epochs=20
 
 init=tf.global_variables_initializer()
 samples = []
@@ -117,14 +117,19 @@ with tf.Session() as sess:
         dcounter = 0
         dcounter = 0
         for i in range(num_batches):
-            print("Epoch ", epoch, "; batch #", i, "out of", num_batches)
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
 
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
+            d1 = sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            g1 = sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            ld += d1/num_batches
+            lg += g1/num_batches
+            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1)
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            ld += sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            lg += sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            
+            
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
         print("Discriminator Loss:", ld)
