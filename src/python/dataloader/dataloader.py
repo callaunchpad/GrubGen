@@ -7,9 +7,6 @@ import random
 from matplotlib import pyplot as plt
 
 
-
-
-
 class DataLoader:
     def __init__(self):
         self.resources = self.find_resources_path()
