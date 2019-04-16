@@ -1,14 +1,13 @@
 import tensorflow as tf
 import time
 import numpy as np
-#import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
 from dataloader import get_batch, load_files
 from PIL import Image
 
-
+print('Hello World')
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -79,7 +78,7 @@ G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
 num_batches=30
 batch_size=200
-epochs=40
+epochs=20
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -95,51 +94,59 @@ train_hist['total_ptime'] = []
 load_files()
 
 with tf.Session() as sess:
-	sess.run(init)
-	#train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
-	#train_set = (train_set - 0.5) * 2
-	for epoch in range(epochs):
-		epoch_start_time = time.time()
-		D_losses=[]
-		G_losses=[]
-		for i in range(num_batches):
-			train_g=True
-			train_d=True
-			batch_images = get_batch(batch_size)[0]
-			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
-			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
-			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
-			D_losses.append(loss_d_)
-			z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
-			loss_g_ = sess.run([G_loss], {z: batch_z, real_images: batch_images})
-			G_losses.append(loss_g_)
-			if loss_d_ > loss_g_ * 2:
-				train_g = False
-			if loss_g_ > loss_d_ * 2:
-				train_d = False
-			if train_d:
-				_ = sess.run([D_trainer], {real_images: batch_images, z: batch_z})
-			if train_g:
-				_ = sess.run([G_trainer], {real_images: batch_images, z: batch_z})
-		epoch_end_time = time.time()
-		per_epoch_ptime = epoch_end_time - epoch_start_time
-		print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
-		train_hist['D_losses'].append(np.mean(D_losses))
-		train_hist['G_losses'].append(np.mean(G_losses))
-		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
-
-		sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
-		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
-
-		gen_samples.append(gen_sample)
+    sess.run(init)
+    print('Sess starting to run....')
+    #train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
+    #train_set = (train_set - 0.5) * 2
+    for epoch in range(epochs):
+        epoch_start_time = time.time()
+        D_losses=[]
+        G_losses=[]
+        print('starting epoch %d ...' % (epoch))
+        for i in range(num_batches):
+            #print('we are now in %d' % (i))
+            train_g=True
+            train_d=True
+            batch_images = get_batch(batch_size)[0]
+            #print('just got batch')
+            batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
+            batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
+            loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
+            #print('just ran loss')
+            D_losses.append(loss_d_)
+            z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
+            loss_g_ = sess.run([G_loss], {z: batch_z, real_images: batch_images})
+            #print('just ran gen loss')
+            G_losses.append(loss_g_)
+            if loss_d_ > loss_g_ * 2:
+                train_g = False
+            if loss_g_ > loss_d_ * 2:
+                train_d = False
+            if train_d:
+                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z})
+            if train_g:
+                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z})
+            #print('finished training batch')
+            epoch_end_time = time.time()
+            per_epoch_ptime = epoch_end_time - epoch_start_time
+        print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        train_hist['D_losses'].append(np.mean(D_losses))
+        train_hist['G_losses'].append(np.mean(G_losses))
+        train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
+            
+        sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+        gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
+        gen_samples.append(gen_sample)
 
 
 
 
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
+reshaped_rgb.astype('float32').tofile('reshaped_rgb_first2')
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
+reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last2')
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 
@@ -148,6 +155,6 @@ img_last.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
 # plt.show()
 
-plt.plot(train_hist['D_losses'])
-plt.plot(train_hist['G_losses'])
-plt.plot(train_hist['per_epoch_ptimes'])
+#plt.plot(train_hist['D_losses'])
+#plt.plot(train_hist['G_losses'])
+#plt.plot(train_hist['per_epoch_ptimes'])
