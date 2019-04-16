@@ -97,7 +97,7 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr/10).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
@@ -126,9 +126,10 @@ with tf.Session() as sess:
             lg += g1/num_batches
             print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1)
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            
+            if (epoch!=0 or i>50):
+                print("running gen")
+                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+                #_=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
