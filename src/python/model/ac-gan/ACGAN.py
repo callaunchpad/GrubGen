@@ -97,7 +97,7 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr/10).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
@@ -135,15 +135,17 @@ with tf.Session() as sess:
         print("Discriminator Loss:", ld)
         lossgs.append(lg)
         lossds.append(ld)
-        oz = np.array([random.randint(0,9)])
+        oz = []
+        for i in range(10):
+            oz.append(i)
         oz = one_hot(oz)
-        samplez=np.random.uniform(-1,1,size=(1,100))
+        samplez=np.random.uniform(-1,1,size=(10,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
+        np.save('ACGAN_data/samples', np.array(samples))
+        np.save('ACGAN_data/discLoss', np.array(lossds))
+        np.save('ACGAN_data/genLoss', np.array(lossgs))
 
 
-np.save('ACGAN_data/samples', np.array(samples))
-np.save('ACGAN_data/discLoss', np.array(lossds))
-np.save('ACGAN_data/genLoss', np.array(lossgs))
 
 plt.imshow(samples[0].reshape(64,64))
 plt.show()
