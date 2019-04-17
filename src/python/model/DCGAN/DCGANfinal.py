@@ -1,7 +1,7 @@
 import tensorflow as tf
 import time
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
@@ -77,9 +77,9 @@ D_trainer=tf.train.AdamOptimizer(lr).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
 
-num_batches=30
-batch_size=200
-epochs=40
+num_batches=10
+batch_size=5
+epochs=2
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -137,9 +137,11 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
+reshaped_rgb.astype('float32').tofile('reshaped_rgb')
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
+reshaped_rgb.astype('float32').tofile('reshaped_rgb_last')
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 

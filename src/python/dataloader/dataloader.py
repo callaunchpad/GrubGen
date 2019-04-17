@@ -4,9 +4,12 @@
 import os
 import numpy as np
 import random
+import matplotlib
+matplotlib.use('agg')
 from matplotlib import pyplot as plt
 
-resources = "../../../resources"
+
+resources = "../../../../resources"
 path = resources + "/processed"
 
 food_paths = [] # maps index for onehot vector to food file path
@@ -46,13 +49,12 @@ def get_batch(size):
 
 def random_gen():
     # random category
-    cat_index = random.randint(0, len(food_paths) - 1)
-    # print(cat_index)
+    cat_index = random.randint(0, len(food_paths)-1)
     cat_file = np.load(food_paths[cat_index])
     cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
 
     # random image from category
-    img_index = random.randint(0, cat_file.shape[0])
+    img_index = random.randint(0, cat_file.shape[0]-1)
 
     # img is in pixels, of size 3*64*64 by 1
     img = cat_file[img_index, :]
