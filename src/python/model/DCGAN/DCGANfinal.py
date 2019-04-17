@@ -78,8 +78,8 @@ G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
 
 num_batches=30
-batch_size=200
-epochs=40
+batch_size=100
+epochs=30
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -130,7 +130,8 @@ with tf.Session() as sess:
             #print('finished training batch')
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
-        print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.flush()
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
@@ -138,7 +139,6 @@ with tf.Session() as sess:
         sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
         gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
         gen_samples.append(gen_sample)
-
 
 
 
