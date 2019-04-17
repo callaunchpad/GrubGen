@@ -76,9 +76,9 @@ D_trainer=tf.train.AdamOptimizer(lr).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
 
-num_batches=30
+num_batches=50
 batch_size=200
-epochs=20
+epochs=40
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -129,7 +129,8 @@ with tf.Session() as sess:
             #print('finished training batch')
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
-        print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.flush()
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
@@ -140,13 +141,12 @@ with tf.Session() as sess:
 
 
 
-
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-reshaped_rgb.astype('float32').tofile('reshaped_rgb_first2')
+reshaped_rgb.astype('float32').tofile('reshaped_rgb_first3')
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last2')
+reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last3')
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 
