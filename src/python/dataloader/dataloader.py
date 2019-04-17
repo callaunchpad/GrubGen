@@ -8,7 +8,6 @@ import matplotlib
 matplotlib.use('agg')
 from matplotlib import pyplot as plt
 
-
 resources = "../../../../resources"
 path = resources + "/processed"
 
