@@ -38,14 +38,11 @@ def generator(inp, y, reuse=None):
     with tf.variable_scope('gen', reuse=reuse):
         bs = tf.shape(inp)[0]
         hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
-        hidden2_im = tf.layers.dense(inputs=hidden1_im, units=128, activation=tf.nn.leaky_relu)
-        output_im = tf.layers.dense(inputs=hidden2_im, units=784, activation=tf.nn.leaky_relu)
         hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
         hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
-        hidden3_y = tf.layers.dense(inputs=hidden2_y, units=512, activation=tf.nn.leaky_relu)
         
-        output_y = tf.layers.dense(inputs=hidden3_y, units=256, activation=tf.nn.leaky_relu)
-        concat = tf.concat([output_im, output_y], 1)
+        
+        concat = tf.concat([hidden1_im, hidden2_y], 1)
         concat_dense = tf.layers.dense(inputs=concat, units=4*4*1024, activation = tf.nn.leaky_relu)
         preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
 
