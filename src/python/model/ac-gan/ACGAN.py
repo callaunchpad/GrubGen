@@ -21,8 +21,17 @@ def one_hot(y_train):
         one[i] = 1
         res += [one]
     return res
+newx = []
+newy = []
+for i in range(len(x_train)):
+    if (y_train[i] == 5):
+        newy.append(y_train[i])
+        newx.append(x_train[i])
+x_train = newx
+y_train = newy
 
-y_train = one_hot(y_train)[:60000]
+
+y_train = one_hot(y_train)
 ### GAN section
 
 def generator(inp, y, reuse=None):
@@ -97,7 +106,7 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr/10).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
@@ -126,7 +135,7 @@ with tf.Session() as sess:
             lg += g1/num_batches
             print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1)
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            if (epoch!=0 or i>50):
+            if (epoch!=0 or i>300):
                 print("running gen")
                 _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
                 #_=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
@@ -142,9 +151,9 @@ with tf.Session() as sess:
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(10,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('ACGAN_data/samples', np.array(samples))
-        np.save('ACGAN_data/discLoss', np.array(lossds))
-        np.save('ACGAN_data/genLoss', np.array(lossgs))
+        np.save('ACGAN_data/samples5sonly', np.array(samples))
+        np.save('ACGAN_data/discLoss5sonly', np.array(lossds))
+        np.save('ACGAN_data/genLoss5sonly', np.array(lossgs))
 
 
 
