@@ -132,10 +132,10 @@ with tf.Session() as sess:
             lg += g1/num_batches
             print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1)
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            if (epoch!=0 or i>300):
-                print("running gen")
-                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            #if (epoch!=0 or i>300):
+            print("running gen")
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
