@@ -143,10 +143,10 @@ with tf.Session() as sess:
         lossgs.append(lg)
         lossds.append(ld)
         oz = []
-        for i in range(10):
-            oz.append(i)
+        #for i in range(10):
+        oz.append(5)
         oz = one_hot(oz)
-        samplez=np.random.uniform(-1,1,size=(10,100))
+        samplez=np.random.uniform(-1,1,size=(1,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
         np.save('ACGAN_data/samples5sonly', np.array(samples))
         np.save('ACGAN_data/discLoss5sonly', np.array(lossds))
