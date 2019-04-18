@@ -89,7 +89,7 @@ dfakelog, dfakeout, dfakeclasses = discriminator(g, reuse=True)
 def loss_func(logits, labels):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
 
-drealloss = loss_func(dreallog, tf.ones_like(dreallog)*0.9)
+drealloss = loss_func(dreallog, tf.ones_like(dreallog))
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
 drealclassloss = loss_func(drealclasses, y2)
 dfakeclassloss = loss_func(dfakeclasses, y1)
