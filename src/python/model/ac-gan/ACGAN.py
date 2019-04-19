@@ -24,7 +24,7 @@ def one_hot(y_train):
 newx = []
 newy = []
 for i in range(len(x_train)):
-    if (y_train[i] == 5):
+    if (y_train[i] == 5 or y_train[i] == 1):
         newy.append(y_train[i])
         newx.append(x_train[i])
 x_train = newx
@@ -158,8 +158,9 @@ with tf.Session() as sess:
         oz = []
         #for i in range(10):
         oz.append(5)
+        oz.append(1)
         oz = one_hot(oz)
-        samplez=np.random.uniform(-1,1,size=(1,100))
+        samplez=np.random.uniform(-1,1,size=(2,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
         np.save('ACGAN_data/samples5sonly', np.array(samples))
         np.save('ACGAN_data/discLoss5sonly', np.array(lossds))
