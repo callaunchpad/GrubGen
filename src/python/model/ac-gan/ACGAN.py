@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=200
+batch_size=300
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
@@ -61,9 +61,9 @@ def generator(inp, y, reuse=None):
 
 def discriminator(img, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=1024, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
-        hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
         hidden2_pool = tf.layers.flatten(hidden2_pool)
         output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
@@ -103,7 +103,7 @@ tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
+dtrainer = tf.train.AdamOptimizer(lr/10).minimize(dloss, var_list=dvars)
 gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
 
 
