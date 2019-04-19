@@ -1,5 +1,6 @@
 import tensorflow as tf
 import time
+import random
 import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
@@ -53,6 +54,8 @@ tf.reset_default_graph()
 real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
 z=tf.placeholder(tf.float32,shape=[None, 1, 1, 100])
 
+#noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
+
 G=generator(z)
 D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
@@ -66,7 +69,7 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.0002
+lr = 0.0004
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -147,11 +150,11 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-reshaped_rgb.astype('float32').tofile('reshaped_rgb_first2')
+reshaped_rgb.astype('float32').tofile('reshaped_rgb_weaker_discriminator')
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last2')
+reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last_weaker_discriminator')
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 
