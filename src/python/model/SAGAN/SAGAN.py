@@ -27,13 +27,13 @@ def generator(z, reuse=None):
 		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=512, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
         #dim [batch, 1, 1, 100]
 		batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
-        
+
 		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
-		
+
         hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=[4,4], filters=128, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
-		
+
         hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=64, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #
@@ -50,7 +50,7 @@ def discriminator(X, reuse=None):
     	batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
     	hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
-    	#x_flat = tf.contrib.layers.flatten(batch_norm3)  	
+    	#x_flat = tf.contrib.layers.flatten(batch_norm3)
     	logits=tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
     	output=tf.sigmoid(logits)
     	return output, logits
@@ -60,7 +60,7 @@ def attention(x, channels, batch):
         f = tf.layers.conv2d(inputs=x, kernel=1, filters = 64, stride=1, scope='f_conv')
         g = tf.layers.conv2d(inputs=x, kernel=1, filters = 64, stride=1, scope='g_conv')
         h = tf.layers.conv2d(inputs=x, kernel=1, filters = 512, stride=1, scope='h_conv')
-        
+
         reshape_f = tf.reshape(f, shape=[-1, 64, 64])
         reshape_g = tf.reshape(g, shape=[-1, 64, 64])
         reshape_h = tf.reshape(h, shape=[-1, 512, 512])
@@ -71,7 +71,7 @@ def attention(x, channels, batch):
         o = tf.reshape(o, shape=x.shape) # [bs, h, w, C]
         x = gamma * o + x
     return x
-    
+
 tf.reset_default_graph()
 
 real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
