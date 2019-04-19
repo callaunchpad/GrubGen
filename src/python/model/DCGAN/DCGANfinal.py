@@ -2,7 +2,7 @@ import tensorflow as tf
 import time
 import random
 import numpy as np
-from tensorflow.examples.tutorials.mnist import input_data
+#from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
 from dataloader import get_batch, load_files
@@ -101,6 +101,8 @@ train_hist['total_ptime'] = []
 
 load_files()
 
+rl_images = np.load("../../../../resources/processed/baklava.npy")
+
 with tf.Session() as sess:
     sess.run(init)
     print('Sess starting to run....')
@@ -111,11 +113,11 @@ with tf.Session() as sess:
         D_losses=[]
         G_losses=[]
         print('starting epoch %d ...' % (epoch))
-        for i in range(num_batches):
+        for i in range(rl_images.shape[0]//batch_size):
             #print('we are now in %d' % (i))
             train_g=True
             train_d=True
-            batch_images = get_batch(batch_size)[0]
+            batch_images = rl_images[i*batch_size:(i+1)*batch_size]
             #print('just got batch')
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
@@ -150,11 +152,11 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-reshaped_rgb.astype('float32').tofile('reshaped_rgb_weaker_discriminator')
+reshaped_rgb.astype('float32').tofile('reshaped_rgb_baklava')
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last_weaker_discriminator')
+reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last_baklava')
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 
