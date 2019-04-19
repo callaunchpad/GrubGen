@@ -36,6 +36,7 @@ def load_files():
 one_hot = np.zeros(len(os.listdir(path))).astype(np.int)
 
 def get_batch(size):
+    load_files()
     batch_one_hots = []
     batch = np.zeros((size, 64*64*3))
     for i in range(0, size):
