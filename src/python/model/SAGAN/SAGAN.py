@@ -26,7 +26,7 @@ def generator(z, reuse=None):
 		#is_training=True
 		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1024, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
 		batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
-        #batch size, 4, 4, 1024
+		#batch size, 4, 4, 1024
 		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=512, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
 		#batch size, 8, 8, 512
@@ -69,11 +69,11 @@ def attention(x, channels):
         g = tf.layers.conv2d(inputs=x, kernel_size=1, filters = channels//8, strides=1) #bs, h, w, filters (channels/8)
         h = tf.layers.conv2d(inputs=x, kernel_size=1, filters = channels, strides=1) #bs, h, w, filters (channels)
         
-        reshape_f = tf.reshape(f, shape=[x.shape[0], -1, x.shape[-1]]) #bs, h*w, filters (channels/8)
-        reshape_g = tf.reshape(f, shape=[x.shape[0], -1, x.shape[-1]]) #bs, h*w, filters (channels/8)
-        reshape_h = tf.reshape(f, shape=[x.shape[0], -1, x.shape[-1]]) #bs, h*w, filters (channels)
+        reshape_f = tf.reshape(f, shape=[f.shape[0], -1, f.shape[-1]]) #bs, h*w, filters (channels/8)
+        reshape_g = tf.reshape(g, shape=[g.shape[0], -1, g.shape[-1]]) #bs, h*w, filters (channels/8)
+        reshape_h = tf.reshape(h, shape=[h.shape[0], -1, h.shape[-1]]) #bs, h*w, filters (channels)
 
-        s = tf.matmul(g, f, transpose_b=True) #bs, h*w, h*w
+        s = tf.matmul(reshape_g, reshape_f, transpose_b=True) #bs, h*w, h*w
         beta = tf.nn.softmax(s) #the attention map
         o = tf.matmul(beta, reshape_h) #bs, h*w, filters (channels)
         gamma = tf.get_variable("gamma", [1], initializer=tf.constant_initializer(0.0))
@@ -83,8 +83,12 @@ def attention(x, channels):
     
 tf.reset_default_graph()
 
-real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
-z=tf.placeholder(tf.float32,shape=[None, 1, 1, 100])
+num_batches=30
+batch_size=200
+epochs=40
+
+real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels])
+z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100])
 
 G=generator(z)
 D_output_real,D_logits_real=discriminator(real_images)
@@ -108,10 +112,6 @@ g_vars=[var for var in tvars if 'gen' in var.name]
 D_trainer=tf.train.AdamOptimizer(lr).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
 
-
-num_batches=30
-batch_size=200
-epochs=40
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -127,6 +127,7 @@ train_hist['total_ptime'] = []
 load_files()
 
 with tf.Session() as sess:
+
 	sess.run(init)
 	#train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
 	#train_set = (train_set - 0.5) * 2
