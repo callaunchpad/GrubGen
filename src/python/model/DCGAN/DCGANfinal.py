@@ -24,13 +24,13 @@ def generator(z, reuse=None):
 		keep_prob=0.6
 		momentum = 0.99
 		#is_training=True
-		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=2048, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
+		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
 		batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
-		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=1028, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=512*2, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
-		hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=[4,4], filters=512, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=[4,4], filters=256*2, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
-		hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=128*2, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
 		output=tf.layers.conv2d_transpose(inputs=batch_norm4, kernel_size=[4,4], filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
 		return output
@@ -38,11 +38,11 @@ def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
     	momentum = 0.99
     	#X = tf.reshape(X, shape=[-1, 64, 64, channels])
-    	hidden1=tf.layers.conv2d(inputs=X, kernel_size=4, filters=1028, strides=2, padding='same', activation=tf.nn.leaky_relu)
+    	hidden1=tf.layers.conv2d(inputs=X, kernel_size=4, filters=128*2, strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
-    	hidden2=tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
+    	hidden2=tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=256*2,strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
-    	hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=256,strides=2, padding='same', activation=tf.nn.leaky_relu)
+    	hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=512*2,strides=2, padding='same', activation=tf.nn.leaky_relu)
     	batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
     	#x_flat = tf.contrib.layers.flatten(batch_norm3)  	
     	logits=tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
@@ -69,14 +69,15 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.0004
+lr_g = 0.0004
+lr_d = 0.00004
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
 g_vars=[var for var in tvars if 'gen' in var.name]
 
-D_trainer=tf.train.AdamOptimizer(lr).minimize(D_loss,var_list=d_vars)
-G_trainer=tf.train.AdamOptimizer(lr).minimize(G_loss,var_list=g_vars)
+D_trainer=tf.train.AdamOptimizer(lr_d).minimize(D_loss,var_list=d_vars)
+G_trainer=tf.train.AdamOptimizer(lr_g).minimize(G_loss,var_list=g_vars)
 
 
 <<<<<<< HEAD
@@ -86,7 +87,7 @@ num_batches=30
 num_batches=40
 >>>>>>> f8599a508a45ce40e67f47703a2eb45af084d550
 batch_size=100
-epochs=20
+epochs=150
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -112,7 +113,7 @@ with tf.Session() as sess:
         epoch_start_time = time.time()
         D_losses=[]
         G_losses=[]
-        print('starting epoch %d ...' % (epoch))
+        print('starting epoch %d ...' % (epoch + 1))
         for i in range(rl_images.shape[0]//batch_size):
             #print('we are now in %d' % (i))
             train_g=True
@@ -152,11 +153,11 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-reshaped_rgb.astype('float32').tofile('reshaped_rgb_baklava')
+np.save('reshaped_rgb_baklava6', reshaped_rgb)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-reshaped_rgb_last.astype('float32').tofile('reshaped_rgb_last_baklava')
+np.save('reshaped_rgb_last_baklava6', reshaped_rgb_last)
 img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 img_last.show()
 
