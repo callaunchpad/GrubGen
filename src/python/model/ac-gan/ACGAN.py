@@ -97,14 +97,15 @@ dloss = drealloss + dfakeloss + drealclassloss + dfakeclassloss
 
 gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss
 
-lr = 0.001
+lrD = tf.placeholder(tf.float32, shape=[])
+lrG = tf.placeholder(tf.float32, shape=[])
 
 tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr/10).minimize(dloss, var_list=dvars)
-gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
+dtrainer = tf.train.AdamOptimizer(lrD).minimize(dloss, var_list=dvars)
+gtrainer = tf.train.AdamOptimizer(lrG).minimize(gloss, var_list=gvars)
 
 
 epochs=100
@@ -116,6 +117,8 @@ lossgs = []
 with tf.Session() as sess:
     sess.run(init)
 
+    lrd = 0.0001
+    lrg = 0.001
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
         ld = 0
@@ -128,14 +131,24 @@ with tf.Session() as sess:
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
             d1 = sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             g1 = sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            
+            
+            if (g1 > 2*d1):
+                lrd = 0.00001
+            if (g1 < 2 and d1 < 2):
+                lrd = 0.00001
+                lrg = 0.0001
+            if (g1*2 < d1):
+                lrd = 0.0001
             ld += d1/num_batches
             lg += g1/num_batches
-            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1)
-            _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1, "lr Disc:", float(lrd), "lr Gen:", float(lrg))
+            _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrD:lrd})
             #if (epoch!=0 or i>300):
             print("running gen")
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
             
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
