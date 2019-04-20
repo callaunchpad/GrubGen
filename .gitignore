@@ -12,3 +12,5 @@
 *.gz
 *.csv
 *.ipynb_checkpoints
+resources/images/
+resources/processed/
