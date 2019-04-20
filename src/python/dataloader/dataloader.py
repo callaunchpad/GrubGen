@@ -52,7 +52,7 @@ class DataLoader:
                 file_path = self.path + "/" + file_name
                 data = np.load(file_path)
                 temp_imgs.append(data)
-                print("Loaded", file_name, "\t\t with index", index)
+                print("Loaded", file_name, "\t\t with index", index, "and", data.shape[0], "imgs")
                 index += 1
 
         temp_onehot = []
@@ -110,9 +110,9 @@ if __name__ == '__main__':
     # to show images in batch:
     count = 0
     for img in b:
-        print(img.shape, img.dtype)
+        # print(img.shape, img.dtype)
         # img = np.reshape(i, (64, 64, 3))
-        img /= 255
+        # img /= 255
         plt.imshow(img)
         count += 1
 
