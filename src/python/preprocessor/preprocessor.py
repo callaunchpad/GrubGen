@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-try:
-    import Image
-except ModuleNotFoundError:
-    from PIL import Image
+from PIL import Image
 import glob
 import os
 import numpy as np
