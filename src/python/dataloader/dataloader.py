@@ -3,7 +3,6 @@
 
 import os
 import numpy as np
-import random
 from matplotlib import pyplot as plt
 
 
@@ -102,19 +101,3 @@ class DataLoader:
         num_slash = new_wd.count("\\") + 1
         pathing = "../" * num_slash + "resources"
         return pathing
-
-if __name__ == '__main__':
-    d = DataLoader()
-    # testing
-    b, boh = d.get_batch(30)
-    # to show images in batch:
-    count = 0
-    for img in b:
-        # print(img.shape, img.dtype)
-        # img = np.reshape(i, (64, 64, 3))
-        # img /= 255
-        plt.imshow(img)
-        count += 1
-
-        plt.show()
-
