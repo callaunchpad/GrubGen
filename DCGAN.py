@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+print("Tensorflow has been imported")
 from tensorflow.examples.tutorials.mnist import input_data
 
 mnist=input_data.read_data_sets("MNIST_data")
@@ -20,7 +20,7 @@ def generator(z, reuse=None):
 		# x = tf.contrib.layers.batch_norm(x, is_training=is_training, decay=momentum)
 		# x = tf.reshape(x, shape=[-1, d1, d1, d2])
 		# x = tf.image.resize_images(x, size=[7, 7])
-		# x = tf.layers.conv2d_transpose(x, kernel_size=5, filters=64, strides=2, padding='same', activation=activation)
+	# x = tf.layers.conv2d_transpose(x, kernel_size=5, filters=64, strides=2, padding='same', activation=activation)
 		# x = tf.layers.dropout(x, keep_prob)
 		# x = tf.contrib.layers.batch_norm(x, is_training=is_training, decay=momentum)
 		# x = tf.layers.conv2d_transpose(x, kernel_size=5, filters=64, strides=2, padding='same', activation=activation)
@@ -99,28 +99,28 @@ init=tf.global_variables_initializer()
 
 gen_samples=[]
 
-
+print("About to start sess...")
 with tf.Session() as sess:
-	sess.run(init)
-	# for epoch in range(epochs):
-	# 	num_batches=mnist.train.num_examples//batch_size
-	# 	for i in range(num_batches):
-	# 		batch=mnist.train.next_batch(batch_size)
-	# 		batch_images=batch[0].reshape((batch_size, 784))
-	# 		batch_images=batch_images*2-1
-	# 		batch_z=np.random.uniform(-1, 1, size=(batch_size, 64))
-	# 		_=sess.run(D_trainer, feed_dict={real_images:batch_images, z:batch_z})
-	# 		_=sess.run(G_trainer,feed_dict={z:batch_z})
-	# 	print("On Epoch{}".format(epoch))
+    print("Running session noooooowwwwww")
+    sess.run(init)
+    for epoch in range(epochs):
+        print("Starting new epoch....")
+        num_batches=mnist.train.num_examples//batch_size
+        for i in range(num_batches):
+            batch=mnist.train.next_batch(batch_size)
+            batch_images=batch[0].reshape((batch_size, 784))
+            batch_images=batch_images*2-1
+            batch_z=np.random.uniform(-1, 1, size=(batch_size, 64))
+            _=sess.run(D_trainer, feed_dict={real_images:batch_images, z:batch_z})
+            _=sess.run(G_trainer,feed_dict={z:batch_z})
+        print("On Epoch{}".format(epoch))
+    sample_z=np.random.uniform(-1,1,size=(1,64))
+    gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
+    gen_samples.append(gen_sample)
 
-	sample_z=np.random.uniform(-1,1,size=(1,64))
-	gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
-
-	gen_samples.append(gen_sample)
 
 
-
-plt.imshow(gen_samples[0].reshape(28, 28))
-plt.show()
-plt.imshow(gen_samples[epochs-1].reshape(28, 28))
-plt.show()
+#plt.imshow(gen_samples[0].reshape(28, 28))
+#plt.show()
+#plt.imshow(gen_samples[epochs-1].reshape(28, 28))
+#plt.show()
