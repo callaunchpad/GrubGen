@@ -8,13 +8,13 @@ from matplotlib import pyplot as plt
 
 
 class DataLoader:
-    def __init__(self):
+    def __init__(self, mode="random"):
         self.resources = self.find_resources_path()
         self.path = self.resources + "/processed"
+        self.images = None;
+        self.
         self.food_paths = [] # maps index for onehot vector to food file path
         self.food_names = [] # maps index to food name
-
-        # print(os.getcwd())
 
     def find_resources_path(self):
         cwd = os.getcwd()
@@ -22,13 +22,8 @@ class DataLoader:
         new_wd = cwd[gg_idx:]
         num_slash = new_wd.count("\\") + 1
         pathing = "../" * num_slash + "resources"
-
-        print(new_wd, num_slash)
-
+        # print(new_wd, num_slash)
         return pathing
-
-        
-        # "../../../resources"
 
     def load_files(self):
         #loads the directory of .npy files into array
@@ -45,14 +40,7 @@ class DataLoader:
         print("FOOD PATHS:")
         print(self.food_paths)
         print("FOOD NAMES:")
-        print(self.food_names)
-
-    # print("FOOD PATHS:")
-    # print(food_paths)
-    # print("FOOD NAMES:")
-    # print(food_names)
-
-    
+        print(self.food_names) 
 
     def get_batch_type(self, size, cat_index):
         # cat_index = list(one_hot.where(1)
@@ -66,7 +54,6 @@ class DataLoader:
             batch_vector[cat_index] = 1
             batch_one_hots.append(batch_vector)
         return batch, batch_one_hots
-
 
     def get_batch(self, size):
         batch_one_hots = []
