@@ -8,13 +8,92 @@ from matplotlib import pyplot as plt
 
 
 class DataLoader:
-    def __init__(self, mode="random"):
+    def __init__(self, mode="random", shuffle=True):
+        print("Initializing dataloader")
+        assert mode=="random" or mode == "cat", ("Unrecognized mode,", mode)
+        self.mode = mode
         self.resources = self.find_resources_path()
         self.path = self.resources + "/processed"
-        self.images = None;
-        self.
-        self.food_paths = [] # maps index for onehot vector to food file path
-        self.food_names = [] # maps index to food name
+
+        self.load_files()
+
+        if shuffle:
+            self.shuffle_data()
+
+        #Compute batch pointers
+        if self.mode == "random":
+            self.curr = 0
+        elif self.mode == "cat":
+            self.curr_lst = [0] * len(self.images_lst)
+
+        print("Done initializing dataloader")
+
+    def shuffle_data(self):
+        if self.mode == "random":
+                self.num_pts = self.images.shape[0]
+                p = np.random.permutation(self.num_pts)
+                print("Total of", self.num_pts, "images loaded into memory")
+                self.images = self.images[p]
+                self.onehots = self.onehots[p]
+
+        elif self.mode == "cat":
+            for i in range(len(self.images_lst)):
+                num = self.images_lst[i].shape[0]
+                p = np.random.permutation(num)
+                self.images_lst[i] = self.images_lst[i][p]
+
+    def load_files(self):
+        #loads the .npy files
+        index = 0
+        temp_imgs = []
+        
+        for file_name in os.listdir(self.path):
+            if file_name.endswith(".npy"):
+                file_path = self.path + "/" + file_name
+                data = np.load(file_path)
+                temp_imgs.append(data)
+                print("Loaded", file_name, "\t\t with index", index)
+                index += 1
+
+        temp_onehot = []
+        for i, data in enumerate(temp_imgs):
+            num_pts = data.shape[0]
+            one_hot = np.zeros(index)
+            one_hot[i] = 1
+            one_hots = np.tile(one_hot, [num_pts, 1])
+            temp_onehot.append(one_hots)
+
+        if self.mode == "random":
+            self.images = np.vstack(temp_imgs)
+            self.onehots = np.vstack(temp_onehot)
+        elif self.mode == "cat":
+            self.images_lst = temp_imgs
+            self.one_hots_lst = temp_onehot #hope is that more memory storage but faster speed
+
+    def get_batch(self, size):
+        if self.mode == "cat":
+            print("This dataloader was configured as a categorical loader, does not support get_batch")
+            a = 1/0
+
+        if self.curr + size >= self.num_pts:
+            self.curr = 0
+
+        ret = self.images[self.curr:self.curr + size], self.onehots[self.curr:self.curr + size]
+        self.curr += size
+        return ret
+
+    def get_batch_type(self, size, cat_index):
+        if self.mode == "random":
+            print("This dataloader was configured as a random loader, does not support get_batch_type")
+            a = 1/0
+
+        cat_num_pts = self.images_lst[i].shape[0]
+        if self.curr_lst[cat_index] + size >= cat_num_pts:
+            self.curr_lst[cat_index] = 0
+
+        ret = self.images_lst[i][self.curr:self.curr + size], self.one_hots_lst[i][0:size]
+        self.curr_lst[cat_index] += size
+        return ret
 
     def find_resources_path(self):
         cwd = os.getcwd()
@@ -22,76 +101,20 @@ class DataLoader:
         new_wd = cwd[gg_idx:]
         num_slash = new_wd.count("\\") + 1
         pathing = "../" * num_slash + "resources"
-        # print(new_wd, num_slash)
         return pathing
-
-    def load_files(self):
-        #loads the directory of .npy files into array
-        index = 0
-        for file_name in os.listdir(self.path):
-            if file_name.endswith(".npy"):
-                # print(file_name)
-                self.food_paths.append(self.path + "/" + file_name) # string: path of file name
-                self.food_names.append(file_name[0:(len(file_name)-4)])
-
-        # one_hot = np.array([0 for file in os.listdir(path)])
-        self.one_hot = np.zeros(len(self.food_paths)).astype(np.int)
-
-        print("FOOD PATHS:")
-        print(self.food_paths)
-        print("FOOD NAMES:")
-        print(self.food_names) 
-
-    def get_batch_type(self, size, cat_index):
-        # cat_index = list(one_hot.where(1)
-        batch_one_hots = []
-        cat_file = np.load(food_paths[cat_index])
-        batch = np.zeros((size, 64*64*3))
-        for i in range(size):
-            img_index = random.randint(0, cat_file.shape[0])
-            img = cat_file[img_index, :]
-            batch[i] = img
-            batch_vector[cat_index] = 1
-            batch_one_hots.append(batch_vector)
-        return batch, batch_one_hots
-
-    def get_batch(self, size):
-        batch_one_hots = []
-        batch = np.zeros((size, 64*64*3))
-        for i in range(0, size):
-            batch_vector = self.one_hot.copy()
-            img, cat_index = self._random_gen()
-            batch[i] = img
-            batch_vector[cat_index] = 1
-            batch_one_hots.append(batch_vector)
-        return batch, batch_one_hots
-
-    def _random_gen(self):
-        # random category
-        cat_index = random.randint(0, len(self.food_paths)-1)
-        cat_file = np.load(self.food_paths[cat_index])
-        cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
-
-        # random image from category
-        img_index = random.randint(0, cat_file.shape[0])
-
-        # img is in pixels, of size 3*64*64 by 1
-        img = cat_file[img_index]
-        return img, cat_index
-
 
 if __name__ == '__main__':
     d = DataLoader()
-    d.load_files()
     # testing
-    print(d.one_hot)
     b, boh = d.get_batch(30)
     # to show images in batch:
     count = 0
-    for i in b:
-        img = np.reshape(i, (64, 64, 3))
+    for img in b:
+        print(img.shape, img.dtype)
+        # img = np.reshape(i, (64, 64, 3))
         img /= 255
         plt.imshow(img)
         count += 1
 
         plt.show()
+
