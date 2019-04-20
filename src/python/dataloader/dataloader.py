@@ -72,7 +72,7 @@ class DataLoader:
     def get_batch(self, size):
         if self.mode == "cat":
             print("This dataloader was configured as a categorical loader, does not support get_batch")
-            a = 1/0
+            raise Exception
 
         if self.curr + size >= self.num_pts:
             self.curr = 0
@@ -84,13 +84,14 @@ class DataLoader:
     def get_batch_type(self, size, cat_index):
         if self.mode == "random":
             print("This dataloader was configured as a random loader, does not support get_batch_type")
-            a = 1/0
+            raise Exception
 
-        cat_num_pts = self.images_lst[i].shape[0]
-        if self.curr_lst[cat_index] + size >= cat_num_pts:
+        cat_num_pts = self.images_lst[cat_index].shape[0]
+        curr = self.curr_lst[cat_index]
+        if curr + size >= cat_num_pts:
             self.curr_lst[cat_index] = 0
 
-        ret = self.images_lst[i][self.curr:self.curr + size], self.one_hots_lst[i][0:size]
+        ret = self.images_lst[cat_index][curr:curr + size], self.one_hots_lst[cat_index][0:size]
         self.curr_lst[cat_index] += size
         return ret
 
@@ -98,6 +99,6 @@ class DataLoader:
         cwd = os.getcwd()
         gg_idx = cwd.index("src")
         new_wd = cwd[gg_idx:]
-        num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1
+        num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1 #max to account for windows vs unix
         pathing = "../" * num_slash + "resources"
         return pathing
