@@ -51,7 +51,7 @@ class DataLoader:
                 file_path = self.path + "/" + file_name
                 data = np.load(file_path)
                 temp_imgs.append(data)
-                print("Loaded", file_name, "\t\t\t\t with index", index, "and", data.shape[0], "imgs")
+                print("Loaded", file_name, "\t\t with index", index, "and", data.shape[0], "imgs")
                 index += 1
 
         temp_onehot = []
