@@ -99,7 +99,7 @@ class DataLoader:
         print(cwd)
         gg_idx = cwd.index("src")
         new_wd = cwd[gg_idx:]
-        num_slash = new_wd.count("\\") + 1
+        num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1
         pathing = "../" * num_slash + "resources"
         print(pathing)
         return pathing
