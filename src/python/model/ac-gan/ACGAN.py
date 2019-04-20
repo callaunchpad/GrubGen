@@ -93,9 +93,9 @@ drealloss = loss_func(dreallog, tf.ones_like(dreallog))
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
 drealclassloss = loss_func(drealclasses, y2)
 dfakeclassloss = loss_func(dfakeclasses, y1)
-dloss = drealloss + dfakeloss + drealclassloss + dfakeclassloss
+dloss = drealloss + dfakeloss + drealclassloss*2 + dfakeclassloss*2
 
-gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss
+gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss*2
 
 lrD = tf.placeholder(tf.float32, shape=[])
 lrG = tf.placeholder(tf.float32, shape=[])
