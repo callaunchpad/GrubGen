@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 class DataLoader:
     def __init__(self, mode="random", shuffle=True):
-        print("Initializing", self.mode "dataloader")
+        print("Initializing", self.mode, "dataloader")
         assert mode=="random" or mode == "cat", ("Unrecognized mode,", mode)
         self.mode = mode
         self.resources = self.find_resources_path()
@@ -25,7 +25,7 @@ class DataLoader:
         elif self.mode == "cat":
             self.curr_lst = [0] * len(self.images_lst)
 
-        print("Done initializing", self.mode "dataloader")
+        print("Done initializing", self.mode, "dataloader")
 
     def shuffle_data(self):
         if self.mode == "random":
