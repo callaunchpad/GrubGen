@@ -107,6 +107,9 @@ def create_np_file(array, name, overwrite=False):
 # saving in folder "food_lists" = './food_lists'
 # takes care of cropping of all the images specified in the dictionary 
 def create_files(food_dict, path_to_folder, size, overwrite): 
+    if not(os.path.exists(path_to_folder)):
+        os.mkdir(path_to_folder)
+
     for key, food_dir_list in food_dict.items():
         if len(food_dir_list) < 1:
             continue
