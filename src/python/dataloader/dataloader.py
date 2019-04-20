@@ -96,10 +96,8 @@ class DataLoader:
 
     def find_resources_path(self):
         cwd = os.getcwd()
-        print(cwd)
         gg_idx = cwd.index("src")
         new_wd = cwd[gg_idx:]
         num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1
         pathing = "../" * num_slash + "resources"
-        print(pathing)
         return pathing
