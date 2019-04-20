@@ -96,6 +96,7 @@ class DataLoader:
 
     def find_resources_path(self):
         cwd = os.getcwd()
+        print(cwd)
         gg_idx = cwd.index("src")
         new_wd = cwd[gg_idx:]
         num_slash = new_wd.count("\\") + 1
