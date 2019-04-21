@@ -89,6 +89,7 @@ class DataLoader:
         cat_num_pts = self.images_lst[cat_index].shape[0]
         curr = self.curr_lst[cat_index]
         if curr + size >= cat_num_pts:
+            curr = 0
             self.curr_lst[cat_index] = 0
 
         ret = self.images_lst[cat_index][curr:curr + size], self.one_hots_lst[cat_index][0:size]
