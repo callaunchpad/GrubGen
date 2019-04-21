@@ -10,6 +10,7 @@
 *.pkl
 *.tgz
 *.gz
-*.npy
 *.csv
 *.ipynb_checkpoints
+resources/images/
+resources/processed/
