@@ -68,12 +68,14 @@ def discriminator(img, reuse=None):
         hidden2_pool = tf.layers.flatten(hidden2_pool)
         output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
 
-        dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
+        dense_0 = tf.layers.dense(inputs=output_im, units=256, activation=tf.nn.leaky_relu)
         
-        logits = tf.layers.dense(dense_0, units=1)
+        dense_1f = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
+        dense_1c = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
+        logits = tf.layers.dense(dense_1f, units=1)
         output = tf.sigmoid(logits)
 
-        classes_logits = tf.layers.dense(dense_0, units=10)
+        classes_logits = tf.layers.dense(dense_1c, units=10)
         classes_output = tf.sigmoid(classes_logits)
         return logits, output, classes_logits #classes_output
 
