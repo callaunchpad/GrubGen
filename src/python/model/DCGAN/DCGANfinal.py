@@ -87,11 +87,11 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 def loss_func(logits_in, labels_in):
 	return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real))
+D_fake_loss=loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss)
 
-G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
+G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
 lr_g = 0.0004
 lr_d = 0.0002
