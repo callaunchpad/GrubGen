@@ -92,7 +92,7 @@ def attention(x, channels):
 
 tf.reset_default_graph()
 
-num_batches=30
+num_batches=2
 batch_size=32
 epochs=100
 
