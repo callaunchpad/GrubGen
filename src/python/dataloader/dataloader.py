@@ -5,7 +5,6 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-
 class DataLoader:
     def __init__(self, mode="random", shuffle=True):
         print("Initializing", mode, "dataloader")
