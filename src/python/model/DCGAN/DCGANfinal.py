@@ -74,7 +74,7 @@ def discriminator(X, reuse=None):
 tf.reset_default_graph()
 
 real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
-z=tf.placeholder(tf.float32,shape=[None, 1, 1, 100])
+z=tf.placeholder(tf.float32,shape=[None, 100])
 training=tf.placeholder(tf.bool)
 
 
@@ -88,13 +88,13 @@ def loss_func(logits_in, labels_in):
 	return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
 
 D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real))
-D_fake_loss=loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
+D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr_g = 0.00002
-lr_d = 0.0001
+lr_g = 0.00004
+lr_d = 0.00004
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -146,7 +146,7 @@ with tf.Session() as sess:
             #np.save('image_test', batch_images[2])
             #print('just got batch')
             #batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
-            batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
+            batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
             loss_d_, _ = sess.run([D_loss, D_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('just ran loss')
             D_losses.append(loss_d_)
@@ -170,14 +170,14 @@ with tf.Session() as sess:
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)    
-        sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+        sample_z=np.random.uniform(-1,1,size=(1, 100))
         gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
         gen_samples.append(gen_sample)
 
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR4', gen_samples)
+np.save('gen_samples_CIFAR5', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
