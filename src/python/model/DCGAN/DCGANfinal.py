@@ -41,16 +41,16 @@ def generator(z,training, reuse=None):
             """ This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels. """
             keep_prob=0.6
             momentum = 0.99
-            hidden0=tf.layers.dense(z, 2*2*512)
-            hidden0 = tf.reshape(hidden0, (-1, 2, 2, 512))
+            hidden0=tf.layers.dense(z, 2*2*1024)
+            hidden0 = tf.reshape(hidden0, (-1, 2, 2, 1024))
             hidden0 = tf.nn.leaky_relu(hidden0)
             #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
             #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
-            hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=5, filters=256, strides=(2, 2), padding='same')
+            hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=5, filters=512, strides=(2, 2), padding='same')
             batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=training, decay=momentum))
-            hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=5, filters=128, strides=(2, 2), padding='same')
+            hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=5, filters=256, strides=(2, 2), padding='same')
             batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, is_training=training, decay=momentum))
-            hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=5, filters=64, strides=(2, 2), padding='same')
+            hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=5, filters=128, strides=(2, 2), padding='same')
             batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, is_training=training, decay=momentum))
             output=tf.layers.conv2d_transpose(inputs=batch_norm4, kernel_size=5, filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
             return output
@@ -93,8 +93,8 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0004
-lr_d = 0.0002
+lr_g = 0.00002
+lr_d = 0.0001
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -105,7 +105,7 @@ G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_var
 
 
 
-batch_size=100
+batch_size=128
 epochs=20
 init=tf.global_variables_initializer()
 
@@ -177,7 +177,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR2', gen_samples)
+np.save('gen_samples_CIFAR4', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
