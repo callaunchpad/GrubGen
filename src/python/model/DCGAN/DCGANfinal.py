@@ -111,6 +111,7 @@ G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 lr_g = 0.0004
 lr_d = 0.0004
 
+
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
 g_vars=[var for var in tvars if 'gen' in var.name]
@@ -175,8 +176,8 @@ with tf.Session() as sess:
              #   train_d = False
            # if train_d:
             #    _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-            if train_g:
-                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
+            #if train_g:
+             #   _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
@@ -192,7 +193,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR5', gen_samples)
+np.save('gen_samples_CIFAR6', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
