@@ -5,7 +5,7 @@ import numpy as np
 #from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
-from dataloader import get_batch, load_files
+#from dataloader import get_batch, load_files
 from PIL import Image
 
 print('Hello World')
@@ -14,7 +14,24 @@ print('Hello World')
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-x_train = np.concatenate((x_train, x_test), axis=0)/255
+x_train = (np.concatenate((x_train, x_test), axis=0) - 127.5)/127.5
+
+
+def show_imgs(batchidx):
+  noise = np.random.normal(0, 1, size=(9, 1, 1, noise_dim))
+  gen_imgs = generator.predict(noise)
+
+  fig, axs = plt.subplots(3, 3)
+  count = 0
+  for i in range(3):
+    for j in range(3):
+      # Dont scale the images back, let keras handle it
+      img = image.array_to_img(gen_imgs[count], scale=True)
+      axs[i,j].imshow(img)
+      axs[i,j].axis('off')
+      count += 1
+  plt.show()
+  plt.close()
 
 
 channels = 3
@@ -25,7 +42,7 @@ def generator(z,training, reuse=None):
             keep_prob=0.6
             momentum = 0.99
             hidden0=tf.layers.dense(z, 2*2*512)
-            hidden0 = tf.reshape(hidden0, (-1, 4, 4, 2048))
+            hidden0 = tf.reshape(hidden0, (-1, 2, 2, 512))
             hidden0 = tf.nn.leaky_relu(hidden0)
             #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
             #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
@@ -44,8 +61,8 @@ def discriminator(X, reuse=None):
         #hidden0 = tf.layers.conv2d(inputs=X, kernel_size=5, filters=128, strides=2, padding='same', activation=tf.nn.leaky_relu)
        # batch_norm0 = tf.contrib.layers.batch_norm(hidden0)
         hidden1=tf.layers.conv2d(inputs=X, kernel_size=4, filters=64, strides=2, padding='same')
-        batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, decay=momentum))
-        hidden2=tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=128,strides=2, padding='same')
+        #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, decay=momentum))
+        hidden2=tf.layers.conv2d(inputs=hidden1, kernel_size=4, filters=128,strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, decay=momentum))
         hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=256,strides=2, padding='same')
         batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
@@ -77,7 +94,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.0004
-lr_d = 0.0004
+lr_d = 0.0002
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -87,14 +104,9 @@ D_trainer=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss,var_list=d_var
 G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_vars)
 
 
-<<<<<<< HEAD
 
-num_batches=30
-=======
-num_batches=40
->>>>>>> f8599a508a45ce40e67f47703a2eb45af084d550
 batch_size=100
-epochs=50
+epochs=20
 init=tf.global_variables_initializer()
 
 gen_samples=[]
@@ -111,6 +123,8 @@ train_hist['total_ptime'] = []
 
 #rl_images = np.load("../../../../resources/processed/baklava.npy")
 #rl_images = (rl_images - 127.5) / 127.5
+
+print(x_train.shape)
 
 
 with tf.Session() as sess:
@@ -146,8 +160,8 @@ with tf.Session() as sess:
              #   train_d = False
            # if train_d:
             #    _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-           # if train_g:
-           #     _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
+            if train_g:
+                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
@@ -155,16 +169,15 @@ with tf.Session() as sess:
         sys.stdout.flush()
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
-        train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
-        if epoch % 5 == 0:    
-            sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
-            gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
-            gen_samples.append(gen_sample)
+        train_hist['per_epoch_ptimes'].append(per_epoch_ptime)    
+        sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+        gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
+        gen_samples.append(gen_sample)
 
 
 
-reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-np.save('gen_samples_baklava_no_freeze_no_noise_same_lr', gen_samples)
+reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
+np.save('gen_samples_CIFAR2', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)

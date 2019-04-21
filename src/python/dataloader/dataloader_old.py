@@ -4,9 +4,8 @@
 import os
 import numpy as np
 import random
-import matplotlib
-matplotlib.use('agg')
 from matplotlib import pyplot as plt
+
 
 class DataLoader:
     def __init__(self):
