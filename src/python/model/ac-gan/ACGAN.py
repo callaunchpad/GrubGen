@@ -75,7 +75,7 @@ def discriminator(img, reuse=None):
 
         classes_logits = tf.layers.dense(dense_0, units=10)
         classes_output = tf.sigmoid(classes_logits)
-        return logits, output, classes_output
+        return logits, output, classes_logits #classes_output
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, 1])
 z = tf.placeholder(tf.float32, shape=[None, 100])
@@ -89,13 +89,16 @@ dfakelog, dfakeout, dfakeclasses = discriminator(g, reuse=True)
 def loss_func(logits, labels):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
 
+def softmax_loss_func(logits, labels):
+    return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=labels))
+
 drealloss = loss_func(dreallog, tf.ones_like(dreallog))
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
-drealclassloss = loss_func(drealclasses, y2)
-dfakeclassloss = loss_func(dfakeclasses, y1)
-dloss = drealloss + dfakeloss + drealclassloss + dfakeclassloss
+drealclassloss = softmax_loss_func(drealclasses, y2)
+dfakeclassloss = softmax_loss_func(dfakeclasses, y1)
+dloss = (drealloss + dfakeloss)/4 + (drealclassloss + dfakeclassloss)/4
 
-gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss
+gloss = loss_func(dfakelog, tf.ones_like(dfakelog))/2 + dfakeclassloss/2
 
 lrD = tf.placeholder(tf.float32, shape=[])
 lrG = tf.placeholder(tf.float32, shape=[])
@@ -131,19 +134,24 @@ with tf.Session() as sess:
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
             d1 = sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
             g1 = sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            drl = sess.run(drealloss,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})           
+            dfl = sess.run(dfakeloss,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})           
+            drcl = sess.run(drealclassloss,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})           
+            dfcl = sess.run(dfakeclassloss,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})           
             
             
-            if (g1 > 2*d1):
-                lrg = 0.001
-                lrd = 0.00001
-            if (g1 < 2 and d1 < 2):
-                lrd = 0.00001
-                lrg = 0.0001
-            if (g1*2 < d1):
-                lrd = 0.0001
+            
+            #if (g1 > 2*d1):
+                #lrg = 0.001
+                #lrd = 0.00001
+            #if (g1 < 2 and d1 < 2):
+            #    lrd = 0.00001
+            #    lrg = 0.0001
+            #if (g1*2 < d1):
+                #lrd = 0.0001
             ld += d1/num_batches
             lg += g1/num_batches
-            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1, "lr Disc:", float(lrd), "lr Gen:", float(lrg))
+            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1, "lr Disc:", float(lrd), "lr Gen:", float(lrg), "discRealLoss:", drl, "discFakeLoss:", dfl, "discRealClassLoss:", drcl, "discFakeClassLoss:", dfcl)
             _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrD:lrd})
             #if (epoch!=0 or i>300):
             print("running gen")
