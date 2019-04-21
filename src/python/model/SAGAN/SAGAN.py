@@ -93,8 +93,8 @@ def attention(x, channels):
 tf.reset_default_graph()
 
 num_batches=30
-batch_size=10
-epochs=15
+batch_size=32
+epochs=100
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
 z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100], name='noise')
