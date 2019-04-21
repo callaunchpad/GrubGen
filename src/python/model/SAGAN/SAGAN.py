@@ -103,7 +103,7 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.005
+lr = 0.004
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
