@@ -24,19 +24,19 @@ def generator(z, reuse=None):
 		keep_prob=0.6
 		momentum = 0.99
 		#is_training=True
-		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=512, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
+		hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1024, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
 		batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
 		#batch size, 4, 4, 1024
-		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden2=tf.layers.conv2d_transpose(inputs=batch_norm1, kernel_size=[4,4], filters=512, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
 		#batch size, 8, 8, 512
 
-		batch_norm2_attention = attention(batch_norm2, 256)
+		batch_norm2_attention = attention(batch_norm2, 512)
 
-		hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2_attention, kernel_size=[4,4], filters=128, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2_attention, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
 		#batch size, 16, 16, 256
-		hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=64, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=[4,4], filters=128, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #batch size, 32, 32, 128
 		output=tf.layers.conv2d_transpose(inputs=batch_norm4, kernel_size=[4,4], filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
