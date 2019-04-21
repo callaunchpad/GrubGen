@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
-from dataloader import get_batch, load_files
+from dataloader import DataLoader
 from PIL import Image
 
 
@@ -84,11 +84,11 @@ def attention(x, channels):
 tf.reset_default_graph()
 
 num_batches=30
-batch_size=200
-epochs=40
+batch_size=5
+epochs=100
 
-real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels])
-z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100])
+real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
+z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100], name='noise')
 
 G=generator(z)
 D_output_real,D_logits_real=discriminator(real_images)
@@ -124,7 +124,7 @@ train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
 
 
-load_files()
+d = DataLoader(mode="cat")
 
 with tf.Session() as sess:
 
@@ -138,8 +138,7 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			d = DataLoader(mode="cat")
-			batch_images = d.get_batch_type(10, 2) 
+			batch_images = d.get_batch_type(batch_size, 2)[0]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
@@ -162,7 +161,7 @@ with tf.Session() as sess:
 		train_hist['G_losses'].append(np.mean(G_losses))
 		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
 
-		sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+		sample_z=np.random.uniform(-1,1,size=(batch_size, 1, 1, 100))
 		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
 
 		gen_samples.append(gen_sample)
@@ -170,18 +169,18 @@ with tf.Session() as sess:
 
 
 
-reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-img = Image.fromarray(reshaped_rgb, 'RGB')
-img.show()
-reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
-img_last.show()
-
+#reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
+#img = Image.fromarray(reshaped_rgb, 'RGB')
+#img.show()
+#reshaped_rgb_last = gen_samples[epochs-1][4].reshape(64, 64, 3)
+#img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
+#img_last.show()
+np.save('first_sagan_test.npy', gen_samples)
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
 # plt.show()
 
-plt.plot(train_hist['D_losses'])
-plt.plot(train_hist['G_losses'])
-plt.plot(train_hist['per_epoch_ptimes'])
+#plt.plot(train_hist['D_losses'])
+#plt.plot(train_hist['G_losses'])
+#plt.plot(train_hist['per_epoch_ptimes'])
