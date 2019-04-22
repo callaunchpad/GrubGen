@@ -94,7 +94,7 @@ tf.reset_default_graph()
 
 num_batches=2
 batch_size=32
-epochs=15
+epochs=50
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
 z=tf.placeholder(tf.float32,shape=[1, 1, 1, 100], name='noise')
@@ -112,7 +112,7 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.004
+lr = 0.002
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -186,10 +186,9 @@ with tf.Session() as sess:
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
-gen_samples = np.array(gen_samples)
-np.save("first", gen_samples[0][batch_size-1])
-np.save("last", gen_samples[epochs-1][batch_size-1])
-
+# gen_samples shape = [epochs, 1, 64, 64, 3]
+np.save('first.npy', gen_samples[0])
+np.save('last.npy', gen_samples[epochs-1])
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
