@@ -81,7 +81,7 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
 D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
-D_loss = (D_real_loss + D_fake_loss) * 0.5
+D_loss = tf.reduce_mean((D_real_loss + D_fake_loss) * 0.5)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
