@@ -169,13 +169,14 @@ with tf.Session() as sess:
 
 
 
-reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
-img = Image.fromarray(reshaped_rgb, 'RGB')
-img.show()
-reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
-img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
-img_last.show()
-
+#reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
+#img = Image.fromarray(reshaped_rgb, 'RGB')
+#img.show()
+#reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
+#img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
+#img_last.show()
+np.save(gen_samples[0], "first")
+np.save(gen_samples[epochs-1], "last")
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
