@@ -108,7 +108,8 @@ gen_samples=[]
 
 
 train_hist = {}
-train_hist['D_losses'] = []
+train_hist['D_losses_real'] = []
+train_hist['D_losses_fake'] = []
 train_hist['G_losses'] = []
 train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
@@ -129,7 +130,8 @@ with tf.Session() as sess:
     #train_set = (train_set - 0.5) * 2
     for epoch in range(epochs):
         epoch_start_time = time.time()
-        D_losses=[]
+        D_losses_real=[]
+        D_losses_fake=[]
         G_losses=[]
         print('starting epoch %d ...' % (epoch + 1))
         for i in range(x_train.shape[0]//batch_size):
@@ -142,11 +144,12 @@ with tf.Session() as sess:
             #print('just got batch')
             #batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
-            loss_d_real, loss_d_fake, _ = sess.run([D_real_loss, D_fake_loss], {real_images: batch_images, z: batch_z, training: True})
+            loss_d_real, loss_d_fake = sess.run([D_loss_real, D_loss_fake], {real_images: batch_images, z: batch_z, training: True})
             #print('just ran loss')
-            D_losses.append(loss_d_)
+            D_losses_real.append(loss_d_real)
+            D_losses_fake.append(loss_d_fake)
             #z_ = np.random.normal(-1, 1, (batch_size, 1, 1, 100))
-            loss_g_, _ = sess.run([G_loss], {z: batch_z, real_images: batch_images, training: True})
+            loss_g_ = sess.run([G_loss], {z: batch_z, real_images: batch_images, training: True})
             #print('just ran gen loss')
             G_losses.append(loss_g_)
             #if loss_d_ > loss_g_ * 2:
@@ -158,9 +161,9 @@ with tf.Session() as sess:
             if train_g:
                 _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
-            epoch_end_time = time.time()
-            per_epoch_ptime = epoch_end_time - epoch_start_time
-        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        epoch_end_time = time.time()
+        per_epoch_ptime = epoch_end_time - epoch_start_time
+        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d_real: %.3f, loss_d_fake: %.3f, loss_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses_real), np.mean(D_losses_fake), np.mean(G_losses)))
         sys.stdout.flush()
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
@@ -172,7 +175,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR6', gen_samples)
+np.save('gen_samples_CIFAR_inverted_ones_higher_lr', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
