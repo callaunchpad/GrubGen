@@ -97,7 +97,7 @@ batch_size=32
 epochs=15
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
-z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100], name='noise')
+z=tf.placeholder(tf.float32,shape=[1, 1, 1, 100], name='noise')
 
 G=generator(z)
 D_output_real,D_logits_real=discriminator(real_images)
@@ -150,7 +150,7 @@ with tf.Session() as sess:
 			baklava_imgs = np.load("baklava.npy")
 			batch_images = baklava_imgs[:batch_size]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
-			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
+			batch_z=np.random.uniform(-1, 1, size=(1, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
 			D_losses.append(loss_d_)
 			z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
@@ -171,7 +171,7 @@ with tf.Session() as sess:
 		train_hist['G_losses'].append(np.mean(G_losses))
 		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
 
-		sample_z=np.random.uniform(-1,1,size=(batch_size, 1, 1, 100))
+		sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
 		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
 
 		gen_samples.append(gen_sample)
