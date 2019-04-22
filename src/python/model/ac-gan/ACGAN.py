@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=300
+batch_size=100
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
@@ -47,10 +47,11 @@ def generator(inp, y, reuse=None):
         preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
 
 
-
-        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
-        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-        conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=128, strides=(2,2), padding='same')
+        #conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
+        #conv0b = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
+        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=2048, strides=(1,1),padding='valid')
+        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=1024, strides=(2,2), padding='same')
+        conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
         output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
         return output
 
@@ -80,6 +81,7 @@ def discriminator(img, reuse=None):
         return logits, output, classes_logits #classes_output
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, 1])
+real_images += tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32) 
 z = tf.placeholder(tf.float32, shape=[None, 100])
 y1 = tf.placeholder(tf.float32, shape=[None, 10])
 y2 = tf.placeholder(tf.float32, shape=[None, 10])
@@ -94,7 +96,7 @@ def loss_func(logits, labels):
 def softmax_loss_func(logits, labels):
     return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=labels))
 
-drealloss = loss_func(dreallog, tf.ones_like(dreallog))
+drealloss = loss_func(dreallog, tf.ones_like(dreallog)*random.uniform(0.9,1))
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
 drealclassloss = softmax_loss_func(drealclasses, y2)
 dfakeclassloss = softmax_loss_func(dfakeclasses, y1)
@@ -132,6 +134,7 @@ with tf.Session() as sess:
         dcounter = 0
         for i in range(num_batches):
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
+            batch_im = batch_im
 
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
             d1 = sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
