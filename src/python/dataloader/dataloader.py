@@ -44,7 +44,7 @@ class DataLoader:
         #loads the .npy files
         index = 0
         temp_imgs = []
-        
+
         for file_name in os.listdir(self.path):
             if file_name.endswith(".npy"):
                 file_path = self.path + "/" + file_name

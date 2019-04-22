@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
-from dataloader import get_batch, load_files
+from dataloader import DataLoader
 from PIL import Image
 
 
@@ -56,7 +56,7 @@ def discriminator(X, reuse=None):
     	batch_norm2_attention = attention(batch_norm2, 256)
 
     	hidden3=tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=512,strides=2, padding='same', activation=tf.nn.leaky_relu)
-    	batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)	
+    	batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
     	#batch size, 8, 8, 512
     	logits=tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
     	#batch size, ?, ?, 1
@@ -68,7 +68,7 @@ def attention(x, channels):
         f = tf.layers.conv2d(inputs=x, kernel_size=1, filters = channels//8, strides=1) #bs, h, w, filters (channels/8)
         g = tf.layers.conv2d(inputs=x, kernel_size=1, filters = channels//8, strides=1) #bs, h, w, filters (channels/8)
         h = tf.layers.conv2d(inputs=x, kernel_size=1, filters = channels, strides=1) #bs, h, w, filters (channels)
-        
+
         reshape_f = tf.reshape(f, shape=[f.shape[0], -1, f.shape[-1]]) #bs, h*w, filters (channels/8)
         reshape_g = tf.reshape(g, shape=[g.shape[0], -1, g.shape[-1]]) #bs, h*w, filters (channels/8)
         reshape_h = tf.reshape(h, shape=[h.shape[0], -1, h.shape[-1]]) #bs, h*w, filters (channels)
@@ -80,15 +80,15 @@ def attention(x, channels):
         o = tf.reshape(o, shape=x.shape) #bs, h, w, filters (channels)
         x = gamma * o + x
     return x
-    
+
 tf.reset_default_graph()
 
 num_batches=30
-batch_size=200
-epochs=40
+batch_size=5
+epochs=100
 
-real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels])
-z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100])
+real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
+z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100], name='noise')
 
 G=generator(z)
 D_output_real,D_logits_real=discriminator(real_images)
@@ -103,7 +103,7 @@ D_loss = D_real_loss + D_fake_loss
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.001
+lr = 0.004
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -124,7 +124,7 @@ train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
 
 
-load_files()
+d = DataLoader(mode="cat")
 
 with tf.Session() as sess:
 
@@ -138,7 +138,7 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			batch_images = get_batch(batch_size)[0]
+			batch_images = d.get_batch_type(batch_size, 2)[0]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
@@ -161,7 +161,7 @@ with tf.Session() as sess:
 		train_hist['G_losses'].append(np.mean(G_losses))
 		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
 
-		sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+		sample_z=np.random.uniform(-1,1,size=(batch_size, 1, 1, 100))
 		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
 
 		gen_samples.append(gen_sample)
@@ -172,16 +172,23 @@ with tf.Session() as sess:
 #reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
+<<<<<<< HEAD
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
 np.save(gen_samples[0], "first")
 np.save(gen_samples[epochs-1], "last")
+=======
+#reshaped_rgb_last = gen_samples[epochs-1][4].reshape(64, 64, 3)
+#img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
+#img_last.show()
+np.save('first_sagan_test.npy', gen_samples)
+>>>>>>> f0c731d16b44575fa5226dfa85f86b9084b27471
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
 # plt.show()
 
-plt.plot(train_hist['D_losses'])
-plt.plot(train_hist['G_losses'])
-plt.plot(train_hist['per_epoch_ptimes'])
+#plt.plot(train_hist['D_losses'])
+#plt.plot(train_hist['G_losses'])
+#plt.plot(train_hist['per_epoch_ptimes'])
