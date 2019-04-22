@@ -79,11 +79,11 @@ D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 
-D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real))
-D_fake_loss=loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
+D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss) * 0.5
 
-G_loss = -loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
+G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
 lr_d = 0.0004
@@ -99,7 +99,7 @@ G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_var
 
 
 batch_size=128
-epochs=20
+epochs=40
 init=tf.global_variables_initializer()
 
 
@@ -142,21 +142,21 @@ with tf.Session() as sess:
             #print('just got batch')
             #batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
-            loss_d_, _ = sess.run([D_loss, D_trainer], {real_images: batch_images, z: batch_z, training: True})
+            loss_d_real, loss_d_fake, _ = sess.run([D_real_loss, D_fake_loss], {real_images: batch_images, z: batch_z, training: True})
             #print('just ran loss')
             D_losses.append(loss_d_)
             #z_ = np.random.normal(-1, 1, (batch_size, 1, 1, 100))
-            loss_g_, _ = sess.run([G_loss, G_trainer], {z: batch_z, real_images: batch_images, training: True})
+            loss_g_, _ = sess.run([G_loss], {z: batch_z, real_images: batch_images, training: True})
             #print('just ran gen loss')
             G_losses.append(loss_g_)
             #if loss_d_ > loss_g_ * 2:
              #   train_g = False
             #if loss_g_ > loss_d_ * 2:
              #   train_d = False
-           # if train_d:
-            #    _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-            #if train_g:
-             #   _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
+            if train_d:
+                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
+            if train_g:
+                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
