@@ -8,7 +8,6 @@ sys.path.insert(0, '../../dataloader')
 #from dataloader import get_batch, load_files
 from PIL import Image
 
-print('Hello World')
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -17,62 +16,52 @@ print('Hello World')
 x_train = (np.concatenate((x_train, x_test), axis=0) - 127.5)/127.5
 
 
-def show_imgs(batchidx):
-  noise = np.random.normal(0, 1, size=(9, 1, 1, noise_dim))
-  gen_imgs = generator.predict(noise)
-
-  fig, axs = plt.subplots(3, 3)
-  count = 0
-  for i in range(3):
-    for j in range(3):
-      # Dont scale the images back, let keras handle it
-      img = image.array_to_img(gen_imgs[count], scale=True)
-      axs[i,j].imshow(img)
-      axs[i,j].axis('off')
-      count += 1
-  plt.show()
-  plt.close()
-
 
 channels = 3
 
+
+def loss_func(logits_in, labels_in):
+    return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
+
+def conv2d(inputs, kernel, filters, strides, padding):
+    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
+
+def conv2d_transpose(inputs, kernel, filters, strides, padding):
+    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
+
+
+def leaky_on_batch_norm(inputs, is_training=True):
+    return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
+
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-            """ This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels. """
-            keep_prob=0.6
-            momentum = 0.99
-            hidden0=tf.layers.dense(z, 2*2*2048)
-            hidden0 = tf.reshape(hidden0, (-1, 2, 2, 2048))
-            hidden0 = tf.nn.leaky_relu(hidden0)
-            #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
-            #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
-            hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=5, filters=1028, strides=(2, 2), padding='same')
-            batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=training, decay=momentum))
-            hidden3=tf.layers.conv2d_transpose(inputs=batch_norm2, kernel_size=5, filters=512, strides=(2, 2), padding='same')
-            batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, is_training=training, decay=momentum))
-            hidden4=tf.layers.conv2d_transpose(inputs=batch_norm3, kernel_size=5, filters=128, strides=(2, 2), padding='same')
-            batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, is_training=training, decay=momentum))
-            output=tf.layers.conv2d_transpose(inputs=batch_norm4, kernel_size=5, filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
-            return output
+        """ This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels. """
+        keep_prob=0.6
+        momentum = 0.99
+        hidden0=tf.layers.dense(z, 2*2*1024)
+        hidden0 = tf.reshape(hidden0, (-1, 2, 2, 1024))
+        hidden0 = tf.nn.leaky_relu(hidden0)
+        #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
+        #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
+        hidden2=conv2d_transpose(inputs=hidden0, kernel=5, filters=512, strides=2, padding='same')
+        batch_norm2 = leaky_on_batch_norm(hidden2, is_training=training)
+        hidden3=conv2d_transpose(inputs=batch_norm2, kernel=5, filters=256, strides=2, padding='same')
+        batch_norm3 = leaky_on_batch_norm(hidden3, is_training=training)
+        hidden4=conv2d_transpose(inputs=batch_norm3, kernel=5, filters=128, strides=2, padding='same')
+        batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
+        output= tf.nn.tanh(conv2d_transpose(inputs=batch_norm4, kernel=5, filters=channels, strides=2, padding='same'))
+        return output
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         momentum = 0.99
-        #X = tf.reshape(X, shape=[-1, 64, 64, channels])
-        #hidden0 = tf.layers.conv2d(inputs=X, kernel_size=5, filters=128, strides=2, padding='same', activation=tf.nn.leaky_relu)
-       # batch_norm0 = tf.contrib.layers.batch_norm(hidden0)
-        hidden1=tf.layers.conv2d(inputs=X, kernel_size=3, filters=64, strides=2, padding='same')
-        print(hidden1.shape)
-        #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, decay=momentum))
-        hidden2=tf.layers.conv2d(inputs=hidden1, kernel_size=3, filters=128,strides=2, padding='same')
-        batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, decay=momentum))
-        print(batch_norm2.shape)
-        hidden3=tf.layers.conv2d(inputs=batch_norm2, kernel_size=3, filters=256,strides=2, padding='same')
-        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
-        #x_flat = tf.contrib.layers.flatten(batch_norm3)
-        logits=tf.layers.conv2d(inputs=batch_norm3, kernel_size=3, filters=1, strides=1, padding='same')
+        hidden1 = conv2d(inputs=X, kernel=3, filters=64, strides=2, padding='same')
+        hidden2 = conv2d(inputs=hidden1, kernel=3, filters=128,strides=2, padding='same')
+        batch_norm2 = leaky_on_batch_norm(hidden2)
+        hidden3 = conv2d(inputs=batch_norm2, kernel=3, filters=256,strides=2, padding='same')
+        batch_norm3 = leaky_on_batch_norm(hidden3)
+        logits = conv2d(inputs=batch_norm3, kernel=3, filters=1, strides=1, padding='same')
         logits = tf.layers.flatten(logits)
         logits = tf.layers.dense(logits, 1)
-        print(logits.shape)
         output=tf.sigmoid(logits)
         return output, logits
 
@@ -89,26 +78,14 @@ G=generator(z, training)
 D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
-def loss_func(logits_in, labels_in):
-	return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
-
-def conv2d(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
-
-def conv2d_transpose(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
-
-
-def leaky_on_batch_norm(inputs, is_training=True):
-    tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
 
 D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real))
-D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake))
+D_fake_loss=loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss) * 0.5
 
-G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+G_loss = -loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0004
+lr_g = 0.001
 lr_d = 0.0004
 
 tvars = tf.trainable_variables()
@@ -123,6 +100,8 @@ G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_var
 batch_size=128
 epochs=20
 init=tf.global_variables_initializer()
+
+
 
 gen_samples=[]
 
