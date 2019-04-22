@@ -43,10 +43,20 @@ returns
 def create_stacked_images(img_list, size): 
     final_array = [] 
     for image_path in img_list:
+
         im = Image.open(image_path)
+        # imgSize = im.size
+        # rawData = im.tobytes()
+        # im = Image.frombytes('F', im.size, im.tobytes(), 'raw')
+        # raw = open(image_path, 'rb').read()
+        # im = Image.frombytes('F', imgSize, raw)
+        # print(img_arr[0][0][0], resized.getpixel((0,0))[0])
+        # print(img_arr.dtype)
         cropped_image = crop(im)
         resized = resize(cropped_image, size)
-        final_array.append(np.array(resized)) 
+        img_arr = np.array(resized)
+        
+        final_array.append(img_arr)
     return np.stack(final_array)      
 
 # returns an array of rgb tuples for one image 
@@ -97,6 +107,9 @@ def create_np_file(array, name, overwrite=False):
 # saving in folder "food_lists" = './food_lists'
 # takes care of cropping of all the images specified in the dictionary 
 def create_files(food_dict, path_to_folder, size, overwrite): 
+    if not(os.path.exists(path_to_folder)):
+        os.mkdir(path_to_folder)
+
     for key, food_dir_list in food_dict.items():
         if len(food_dir_list) < 1:
             continue

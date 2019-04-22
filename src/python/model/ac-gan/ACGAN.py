@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=100
+batch_size=300
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
@@ -21,28 +21,28 @@ def one_hot(y_train):
         one[i] = 1
         res += [one]
     return res
+newx = []
+newy = []
+for i in range(len(x_train)):
+    if (y_train[i] == 5 or y_train[i] == 1):
+        newy.append(y_train[i])
+        newx.append(x_train[i])
+x_train = newx
+y_train = newy
 
-y_train = one_hot(y_train)[:5000]
+
+y_train = one_hot(y_train)
 ### GAN section
 
 def generator(inp, y, reuse=None):
     with tf.variable_scope('gen', reuse=reuse):
         bs = tf.shape(inp)[0]
         hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
-        hidden2_im = tf.layers.dense(inputs=hidden1_im, units=128, activation=tf.nn.leaky_relu)
-        output_im = tf.layers.dense(inputs=hidden2_im, units=784, activation=tf.nn.leaky_relu)
-<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
-        hidden1_y = tf.layers.dense(inputs=y, units=128, activation=tf.nn.leaky_relu)
-        hidden2_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
-        output_y = tf.layers.dense(inputs=hidden2_y, units=784, activation=tf.nn.leaky_relu)
-=======
         hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
         hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
-        hidden3_y = tf.layers.dense(inputs=hidden2_y, units=512, activation=tf.nn.leaky_relu)
         
-        output_y = tf.layers.dense(inputs=hidden3_y, units=256, activation=tf.nn.leaky_relu)
->>>>>>> a462d49694cd90faa023191b6497527532c9e078:src/python/model/ac-gan/ACGAN.py
-        concat = tf.concat([output_im, output_y], 1)
+        
+        concat = tf.concat([hidden1_im, hidden2_y], 1)
         concat_dense = tf.layers.dense(inputs=concat, units=4*4*1024, activation = tf.nn.leaky_relu)
         preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
 
@@ -59,37 +59,23 @@ def generator(inp, y, reuse=None):
 
 
 
-def discriminator(gen_inp, img_inp, reuse=None):
+def discriminator(img, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1_im = tf.layers.conv2d(gen_inp,  kernel_size=[5,5], filters=256, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=1024, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
-        hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+        hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
         hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
-        #flatten here
         hidden2_pool = tf.layers.flatten(hidden2_pool)
-        output_im = tf.layers.dense(inputs=hidden2_pool, units=128, activation=tf.nn.leaky_relu)
-<<<<<<< HEAD:src/python/model/ac-gan/modelDemo.py
-        hidden1_y = tf.layers.dense(inputs=img_inp, units=128, activation=tf.nn.leaky_relu)
-        output_y = tf.layers.dense(inputs=hidden1_y, units=128, activation=tf.nn.leaky_relu)
-=======
-        hidden1_y = tf.layers.dense(inputs=img_inp, units=256, activation=tf.nn.leaky_relu)
-        hidden2_y = tf.layers.dense(inputs=hidden1_y, units = 256, activation = tf.nn.leaky_relu)
-        hidden3_y = tf.layers.dense(inputs=hidden2_y, units = 256, activation = tf.nn.leaky_relu)
-        
-        output_y = tf.layers.dense(inputs=hidden3_y, units=128, activation=tf.nn.leaky_relu)
->>>>>>> a462d49694cd90faa023191b6497527532c9e078:src/python/model/ac-gan/ACGAN.py
+        output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
 
         dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
-        dense_1 = tf.layers.dense(inputs=dense_0, units=10, activation=tf.nn.leaky_relu)
-        flatten_1 = tf.layers.flatten(dense_1)
-
-        concat = tf.concat([flatten_1, output_y], 1)
-        dense_2 = tf.layers.dense(inputs=concat, units=256, activation=tf.nn.leaky_relu)
-        dense_3 = tf.layers.dense(inputs=dense_2, units=256, activation=tf.nn.leaky_relu)
         
-        logits = tf.layers.dense(dense_3, units=1)
+        logits = tf.layers.dense(dense_0, units=1)
         output = tf.sigmoid(logits)
-        return logits, output
+
+        classes_logits = tf.layers.dense(dense_0, units=10)
+        classes_output = tf.sigmoid(classes_logits)
+        return logits, output, classes_output
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, 1])
 z = tf.placeholder(tf.float32, shape=[None, 100])
@@ -97,29 +83,32 @@ y1 = tf.placeholder(tf.float32, shape=[None, 10])
 y2 = tf.placeholder(tf.float32, shape=[None, 10])
 y3 = tf.placeholder(tf.float32, shape=[None, 10])
 g = generator(z, y1)
-dreallog, drealout = discriminator(real_images, y2)
-dfakelog, dfakeout = discriminator(g, y3, reuse=True)
+dreallog, drealout, drealclasses = discriminator(real_images)
+dfakelog, dfakeout, dfakeclasses = discriminator(g, reuse=True)
 
 def loss_func(logits, labels):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
 
-drealloss = loss_func(dreallog, tf.ones_like(dreallog)*0.9)
+drealloss = loss_func(dreallog, tf.ones_like(dreallog))
 dfakeloss = loss_func(dfakelog, tf.zeros_like(dfakelog))
-dloss = drealloss + dfakeloss
+drealclassloss = loss_func(drealclasses, y2)
+dfakeclassloss = loss_func(dfakeclasses, y1)
+dloss = drealloss + dfakeloss + drealclassloss*2 + dfakeclassloss*2
 
-gloss = loss_func(dfakelog, tf.ones_like(dfakelog))
+gloss = loss_func(dfakelog, tf.ones_like(dfakelog)) + dfakeclassloss*2
 
-lr = 0.001
+lrD = tf.placeholder(tf.float32, shape=[])
+lrG = tf.placeholder(tf.float32, shape=[])
 
 tvars=tf.trainable_variables()
 dvars=[var for var in tvars if 'dis' in var.name]
 gvars=[var for var in tvars if 'gen' in var.name]
 
-dtrainer = tf.train.AdamOptimizer(lr).minimize(dloss, var_list=dvars)
-gtrainer = tf.train.AdamOptimizer(lr).minimize(gloss, var_list=gvars)
+dtrainer = tf.train.AdamOptimizer(lrD).minimize(dloss, var_list=dvars)
+gtrainer = tf.train.AdamOptimizer(lrG).minimize(gloss, var_list=gvars)
 
 
-epochs=1
+epochs=100
 
 init=tf.global_variables_initializer()
 samples = []
@@ -128,6 +117,8 @@ lossgs = []
 with tf.Session() as sess:
     sess.run(init)
 
+    lrd = 0.0001
+    lrg = 0.001
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
         ld = 0
@@ -135,28 +126,47 @@ with tf.Session() as sess:
         dcounter = 0
         dcounter = 0
         for i in range(num_batches):
-            print("Epoch ", epoch, "; batch #", i, "out of", num_batches)
             batch_im, batch_y = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
 
             batch_z=np.random.uniform(-1,1,size=(batch_size,100))
-            _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            ld += sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
-            lg += sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            d1 = sess.run(dloss, feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            g1 = sess.run(gloss, feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y})
+            
+            
+            if (g1 > 2*d1):
+                lrd = 0.00001
+            if (g1 < 2 and d1 < 2):
+                lrd = 0.00001
+                lrg = 0.0001
+            if (g1*2 < d1):
+                lrd = 0.0001
+            ld += d1/num_batches
+            lg += g1/num_batches
+            print("Epoch ", epoch, "; batch #", i, "out of", num_batches, "genBatchLoss:", g1, "discBatchLoss:", d1, "lr Disc:", float(lrd), "lr Gen:", float(lrg))
+            _=sess.run(dtrainer,feed_dict={real_images:batch_im,z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrD:lrd})
+            #if (epoch!=0 or i>300):
+            print("running gen")
+
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
+            
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
         print("Discriminator Loss:", ld)
         lossgs.append(lg)
         lossds.append(ld)
-        oz = np.array([random.randint(0,9)])
+        oz = []
+        #for i in range(10):
+        oz.append(5)
+        oz.append(1)
         oz = one_hot(oz)
-        samplez=np.random.uniform(-1,1,size=(1,100))
+        samplez=np.random.uniform(-1,1,size=(2,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
+        np.save('ACGAN_data/samples5sonly', np.array(samples))
+        np.save('ACGAN_data/discLoss5sonly', np.array(lossds))
+        np.save('ACGAN_data/genLoss5sonly', np.array(lossgs))
 
 
-np.save('samples', np.array(samples))
-np.save('discLoss', np.array(lossds))
-np.save('genLoss', np.array(lossgs))
 
 plt.imshow(samples[0].reshape(64,64))
 plt.show()
