@@ -61,7 +61,7 @@ def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         x = tf.layers.dense(z, 128 * 16 * 16, activation=tf.nn.leaky_relu)
         x = leaky_on_batch_norm(x)
-        x = tf.reshape(x, (16, 16, 128))
+        x = tf.reshape(x, (-1, 16, 16, 128))
 
         x = conv2d(x, 5, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
@@ -117,7 +117,7 @@ def discriminator(X, reuse=None):
 tf.reset_default_graph()
 
 real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
-z=tf.placeholder(tf.float32,shape=[None, 100])
+z=tf.placeholder(tf.float32,shape=[None, 1, 1, 100])
 training=tf.placeholder(tf.bool)
 
 
