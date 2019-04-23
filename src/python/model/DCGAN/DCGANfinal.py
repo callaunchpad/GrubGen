@@ -13,8 +13,8 @@ from PIL import Image
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-X_train = X_train[y_train[:,0]==1]
-print ("Training shape: {}".format(X_train.shape))
+x_train = x_train[y_train[:,0]==1]
+print ("Training shape: {}".format(x_train.shape))
 
 x_train = (x_train - 127.5)/127.5
 
@@ -93,7 +93,7 @@ def discriminator(X, reuse=None):
         output=tf.sigmoid(logits)
         return output, logits """
 
-def discriminator(X, reuse=None):
+def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         x = conv2d(x, 3, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
@@ -109,7 +109,7 @@ def discriminator(X, reuse=None):
 
         x = tf.layers.flatten(x)
         x = tf.nn.dropout(x, 0.4)
-        logits = tf.nn.dense(x, 1)
+        logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(x)
         return output, logits
 
