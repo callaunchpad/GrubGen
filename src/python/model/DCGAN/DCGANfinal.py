@@ -13,7 +13,11 @@ from PIL import Image
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-x_train = (np.concatenate((x_train, x_test), axis=0) - 127.5)/127.5
+X_train = X_train[y_train[:,0]==1]
+print ("Training shape: {}".format(X_train.shape))
+
+x_train = (x_train - 127.5)/127.5
+
 
 
 
@@ -32,10 +36,10 @@ def conv2d_transpose(inputs, kernel, filters, strides, padding):
 
 def leaky_on_batch_norm(inputs, is_training=True):
     return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
-
+"""
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        """ This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels. """
+         This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
         keep_prob=0.6
         momentum = 0.99
         hidden0=tf.layers.dense(z, 2*2*1024)
@@ -51,6 +55,30 @@ def generator(z,training, reuse=None):
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
         output= tf.nn.tanh(conv2d_transpose(inputs=batch_norm4, kernel=5, filters=channels, strides=2, padding='same'))
         return output
+        """
+
+def generator(z, training, reuse=None):
+    with tf.variable_scope('gen',reuse=reuse):
+        x = tf.layers.dense(z, 128 * 16 * 16, activation=tf.nn.leaky_relu)
+        x = leaky_on_batch_norm(x)
+        x = tf.reshape(x, (16, 16, 128))
+
+        x = conv2d(x, 5, 128, 1, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d_transpose(x, 4, 128, 2, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d(x, 5, 128, 1, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d(x, 5, 128, 1, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
+        return x
+
+"""
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         momentum = 0.99
@@ -63,7 +91,28 @@ def discriminator(X, reuse=None):
         logits = tf.layers.flatten(logits)
         logits = tf.layers.dense(logits, 1)
         output=tf.sigmoid(logits)
+        return output, logits """
+
+def discriminator(X, reuse=None):
+    with tf.variable_scope('dis',reuse=reuse):
+        x = conv2d(x, 3, 128, 1, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d(x, 4, 128, 2, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d(x, 4, 128, 2, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = conv2d(x, 4, 128, 2, 'same')
+        x = leaky_on_batch_norm(x)
+
+        x = tf.layers.flatten(x)
+        x = tf.nn.dropout(x, 0.4)
+        logits = tf.nn.dense(x, 1)
+        output = tf.sigmoid(x)
         return output, logits
+
 
 tf.reset_default_graph()
 
@@ -81,12 +130,12 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
 D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
-D_loss = tf.reduce_mean((D_real_loss + D_fake_loss) * 0.5)
+D_loss = (D_real_loss + D_fake_loss) * 0.5
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.005
-lr_d = 0.0005
+lr_g = 0.0002
+lr_d = 0.0002
 
 
 tvars = tf.trainable_variables()
@@ -175,7 +224,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR_inverted_ones_tenth_lr', gen_samples)
+np.save('gen_samples_CIFAR_from_copy_network', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
