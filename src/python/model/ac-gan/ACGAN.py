@@ -176,9 +176,9 @@ with tf.Session() as sess:
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(2,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('ACGAN_data/samples5sonly', np.array(samples))
-        np.save('ACGAN_data/discLoss5sonly', np.array(lossds))
-        np.save('ACGAN_data/genLoss5sonly', np.array(lossgs))
+        np.save('ACGAN_data/samples5s1sAbhi', np.array(samples))
+        np.save('ACGAN_data/discLoss5s1sAbhi', np.array(lossds))
+        np.save('ACGAN_data/genLoss5s1sAbhi', np.array(lossgs))
 
 
 
