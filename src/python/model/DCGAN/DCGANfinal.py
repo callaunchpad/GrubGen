@@ -8,8 +8,8 @@ sys.path.insert(0, '../../dataloader')
 #from dataloader import get_batch, load_files
 from PIL import Image
 
-batch_size=128
-epochs=40
+batch_size=28
+epochs=20
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -232,7 +232,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR_from_copy_network', gen_samples)
+np.save('gen_samples_CIFAR_from_copy_network2', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
