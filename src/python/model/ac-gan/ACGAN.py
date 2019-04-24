@@ -6,13 +6,13 @@ import sys
 import scipy
 import random
 #from ../dataloader.dataloader import get_batch
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 #matplotlib.use('GTK3Agg')
 import matplotlib.pyplot as plt
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
 x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=100
+batch_size=200
 digits = [i for i in range(10)]
 def one_hot(y_train):
     res = []
@@ -49,8 +49,8 @@ def generator(inp, y, reuse=None):
 
         #conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
         #conv0b = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
-        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=2048, strides=(1,1),padding='valid')
-        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=1024, strides=(2,2), padding='same')
+        conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=1024, strides=(1,1),padding='valid')
+        conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
         conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
         output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
         return output
@@ -124,7 +124,7 @@ lossgs = []
 with tf.Session() as sess:
     sess.run(init)
 
-    lrd = 0.0001
+    lrd = 0.00002
     lrg = 0.001
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
@@ -162,7 +162,8 @@ with tf.Session() as sess:
             print("running gen")
 
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
-            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
+            if (g1 > d1*2):
+                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
             
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
@@ -176,9 +177,9 @@ with tf.Session() as sess:
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(2,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('ACGAN_data/samples5s1sAbhi', np.array(samples))
-        np.save('ACGAN_data/discLoss5s1sAbhi', np.array(lossds))
-        np.save('ACGAN_data/genLoss5s1sAbhi', np.array(lossgs))
+        np.save('ACGAN_data/samples5s1sAbhi3', np.array(samples))
+        np.save('ACGAN_data/discLoss5s1sAbhi3', np.array(lossds))
+        np.save('ACGAN_data/genLoss5s1sAbhi3', np.array(lossgs))
 
 
 
