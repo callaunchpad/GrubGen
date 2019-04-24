@@ -8,6 +8,8 @@ sys.path.insert(0, '../../dataloader')
 #from dataloader import get_batch, load_files
 from PIL import Image
 
+batch_size=128
+epochs=40
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -117,9 +119,18 @@ def discriminator(x, reuse=None):
 tf.reset_default_graph()
 
 real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
-z=tf.placeholder(tf.float32,shape=[None, 1, 1, 100])
+z=tf.placeholder(tf.float32,shape=[None, 100])
 training=tf.placeholder(tf.bool)
 
+noise_prop = 0.05
+
+# true_labels = np.zeros((batch_size, 1)) + np.random.uniform(low=0.0, high=0.1, size=(batch_size, 1))
+# flipped_idx = np.random.choice(np.arange(len(true_labels)), size=int(noise_prop*len(true_labels)))
+# true_labels[flipped_idx] = 1 - true_labels[flipped_idx]
+
+# gene_labels = np.ones((batch_size, 1)) - np.random.uniform(low=0.0, high=0.1, size=(batch_size, 1))
+# flipped_idx = np.random.choice(np.arange(len(gene_labels)), size=int(noise_prop*len(gene_labels)))
+# gene_labels[flipped_idx] = 1 - gene_labels[flipped_idx]
 
 #noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
@@ -128,8 +139,8 @@ D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 D_loss = (D_real_loss + D_fake_loss) * 0.5
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
@@ -147,8 +158,7 @@ G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_var
 
 
 
-batch_size=128
-epochs=40
+
 init=tf.global_variables_initializer()
 
 
@@ -184,22 +194,20 @@ with tf.Session() as sess:
         G_losses=[]
         print('starting epoch %d ...' % (epoch + 1))
         for i in range(x_train.shape[0]//batch_size):
-            #print('we are now in %d' % (i))
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
             batch_images = x_train[i*batch_size:(i+1)*batch_size]
-            #np.save('image_test', batch_images[2])
-            #print('just got batch')
-            #batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
+
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
+            noise_prop = 0.05 # Randomly flip 5% of labels
+    
+            # Prepare labels for real data
+
             loss_d_real, loss_d_fake = sess.run([D_real_loss, D_fake_loss], {real_images: batch_images, z: batch_z, training: True})
-            #print('just ran loss')
             D_losses_real.append(loss_d_real)
             D_losses_fake.append(loss_d_fake)
-            #z_ = np.random.normal(-1, 1, (batch_size, 1, 1, 100))
             loss_g_ = sess.run([G_loss], {z: batch_z, real_images: batch_images, training: True})
-            #print('just ran gen loss')
             G_losses.append(loss_g_)
             #if loss_d_ > loss_g_ * 2:
              #   train_g = False
