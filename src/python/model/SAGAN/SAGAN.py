@@ -1,10 +1,14 @@
 import tensorflow as tf
 import time
 import numpy as np
+import os
 #import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
-sys.path.insert(0, "../../dataloader")
+sys.path.insert(0, "/../../dataloader")
+print(sys.path)
+import os 
+a = os.listdir()
 from dataloader import DataLoader
 from PIL import Image
 
