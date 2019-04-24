@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 28
-epoch s= 20
+epochs= 20
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -112,7 +112,7 @@ def discriminator(x, reuse=None):
         x = tf.layers.flatten(x)
         x = tf.nn.dropout(x, 0.4)
         logits = tf.layers.dense(x, 1)
-        output = tf.sigmoid(x)
+        output = tf.sigmoid(logits)
         return output, logits
 
 
@@ -197,9 +197,9 @@ with tf.Session() as sess:
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            rl_images = np.load("../../../../resources/processed/baklava.npy")
-            rl_images = (rl_images - 127.5) / 127.5
-            #batch_images = x_train[i*batch_size:(i+1)*batch_size]
+            #rl_images = np.load("../../../../resources/processed/baklava.npy")
+            #rl_images = (rl_images - 127.5) / 127.5
+            batch_images = x_train[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
     
