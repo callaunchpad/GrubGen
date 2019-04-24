@@ -39,6 +39,7 @@ def conv2d_transpose(inputs, kernel, filters, strides, padding):
 def leaky_on_batch_norm(inputs, is_training=True):
     return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
 
+
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
@@ -56,6 +57,7 @@ def generator(z,training, reuse=None):
         hidden4=conv2d_transpose(inputs=batch_norm3, kernel=5, filters=128, strides=2, padding='same')
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
         output= tf.nn.tanh(conv2d_transpose(inputs=batch_norm4, kernel=5, filters=channels, strides=2, padding='same'))
+        print("final gen:" + str(output.shape))
         return output
         """
 
@@ -78,6 +80,7 @@ def generator(z, training, reuse=None):
         x = leaky_on_batch_norm(x)
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
+        print("final gen:" + str(x.shape))
         return x
 
 
@@ -99,18 +102,23 @@ def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         x = conv2d(x, 3, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
+        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
+        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
+        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
+        print(x.shape)
 
         x = tf.layers.flatten(x)
         x = tf.nn.dropout(x, 0.4)
+        print("final layer:" + str(x.shape))
         logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(logits)
         return output, logits
@@ -118,7 +126,7 @@ def discriminator(x, reuse=None):
 
 tf.reset_default_graph()
 
-real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
+real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
 z=tf.placeholder(tf.float32,shape=[None, 100])
 training=tf.placeholder(tf.bool)
 
