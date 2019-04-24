@@ -4,7 +4,7 @@ import numpy as np
 #import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
-sys.path.insert(0, '../../dataloader')
+sys.path.insert(0, "../../dataloader")
 from dataloader import DataLoader
 from PIL import Image
 
@@ -172,18 +172,13 @@ with tf.Session() as sess:
 #reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
-<<<<<<< HEAD
+
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
 np.save(gen_samples[0], "first")
 np.save(gen_samples[epochs-1], "last")
-=======
-#reshaped_rgb_last = gen_samples[epochs-1][4].reshape(64, 64, 3)
-#img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
-#img_last.show()
-np.save('first_sagan_test.npy', gen_samples)
->>>>>>> f0c731d16b44575fa5226dfa85f86b9084b27471
+
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
