@@ -57,7 +57,6 @@ def generator(z,training, reuse=None):
         hidden4=conv2d(inputs=batch_norm3, kernel=5, filters=128, strides=1, padding='same')
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
         output= tf.nn.tanh(conv2d(inputs=batch_norm4, kernel=5, filters=channels, strides=1, padding='same'))
-        print("final gen:" + str(output.shape))
         return output
         """
 
@@ -102,23 +101,18 @@ def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         x = conv2d(x, 3, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
-        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
-        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
-        print(x.shape)
 
         x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
-        print(x.shape)
 
         x = tf.layers.flatten(x)
         x = tf.nn.dropout(x, 0.4)
-        print("final layer:" + str(x.shape))
         logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(logits)
         return output, logits
