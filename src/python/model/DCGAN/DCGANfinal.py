@@ -8,8 +8,8 @@ sys.path.insert(0, '../../dataloader')
 #from dataloader import get_batch, load_files
 from PIL import Image
 
-batch_size=28
-epochs=20
+batch_size = 28
+epoch s= 20
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -61,9 +61,9 @@ def generator(z,training, reuse=None):
 
 def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        x = tf.layers.dense(z, 128 * 16 * 16, activation=tf.nn.leaky_relu)
+        x = tf.layers.dense(z, 128 * 32 * 32, activation=tf.nn.leaky_relu)
         x = leaky_on_batch_norm(x)
-        x = tf.reshape(x, (-1, 16, 16, 128))
+        x = tf.reshape(x, (-1, 32, 32, 128))
 
         x = conv2d(x, 5, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
@@ -118,7 +118,7 @@ def discriminator(x, reuse=None):
 
 tf.reset_default_graph()
 
-real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
+real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
 z=tf.placeholder(tf.float32,shape=[None, 100])
 training=tf.placeholder(tf.bool)
 
@@ -200,10 +200,7 @@ with tf.Session() as sess:
             batch_images = x_train[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
-            noise_prop = 0.05 # Randomly flip 5% of labels
     
-            # Prepare labels for real data
-
             loss_d_real, loss_d_fake = sess.run([D_real_loss, D_fake_loss], {real_images: batch_images, z: batch_z, training: True})
             D_losses_real.append(loss_d_real)
             D_losses_fake.append(loss_d_fake)
