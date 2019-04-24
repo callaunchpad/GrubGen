@@ -86,8 +86,9 @@ def generator(z, training, reuse=None):
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         momentum = 0.99
-        hidden1 = conv2d(inputs=X, kernel=3, filters=128, strides=1, padding='same')
-        hidden2 = conv2d(inputs=hidden1, kernel=4, filters=128,strides=2, padding='same')
+        hidden1 = conv2d(inputs=X, kernel=3, filters=256, strides=1, padding='same')
+        hidden1 = leaky_on_batch_norm(hidden1)
+        hidden2 = conv2d(inputs=hidden1, kernel=4, filters=256,strides=2, padding='same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         hidden3 = conv2d(inputs=batch_norm2, kernel=4, filters=256,strides=2, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
@@ -150,7 +151,7 @@ D_loss = (D_real_loss + D_fake_loss) * 0.5
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0002
+lr_g = 0.0004
 lr_d = 0.0002
 
 
@@ -236,7 +237,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR_from_my_gan', gen_samples)
+np.save('gen_samples_CIFAR_from_my_gan3', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
