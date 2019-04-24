@@ -7,9 +7,9 @@ from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, "/../../dataloader")
 print(sys.path)
-import os 
+import os
 a = os.listdir()
-from dataloader import DataLoader
+#from dataloader import DataLoader
 from PIL import Image
 
 
@@ -128,7 +128,7 @@ train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
 
 
-d = DataLoader(mode="cat")
+# d = DataLoader(mode="cat")
 
 with tf.Session() as sess:
 
@@ -142,7 +142,8 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			batch_images = d.get_batch_type(batch_size, 2)[0]
+			baklava_imgs = np.load("./baklava.npy")
+			batch_images = baklava_imgs[:batch_size]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
