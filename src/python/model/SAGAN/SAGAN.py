@@ -28,8 +28,9 @@ def generator(z, reuse=None):
 		hidden0=tf.layers.dense(z, 16*16*256)
 		hidden0 = tf.reshape(hidden0, (-1, 16, 16, 256))
 		hidden0 = tf.nn.leaky_relu(hidden0)
-		hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=256, strides=2, padding='same')
+		hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=512, strides=2, padding='same')
 		batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
+		print(batch_norm2.shape)
 		# hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1024, strides=(1, 1), padding='valid', activation=tf.nn.leaky_relu)
 		# batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
 		# #batch size, 4, 4, 1024
@@ -37,16 +38,18 @@ def generator(z, reuse=None):
 		# batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
 		# #batch size, 8, 8, 512
 
-		batch_norm2_attention = attention(batch_norm2, 256)
+		batch_norm2_attention = attention(batch_norm2, 512)
 
-		hidden3=tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=[4,4], filters=256, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden3=tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=[4,4], filters=256, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
 		#batch size, 16, 16, 256
-		hidden4=tf.layers.conv2d(inputs=batch_norm3, kernel_size=[4,4], filters=128, strides=(2, 2), padding='same', activation=tf.nn.leaky_relu)
+		hidden4=tf.layers.conv2d(inputs=batch_norm3, kernel_size=[4,4], filters=128, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #batch size, 32, 32, 128
-		output=tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4,4], filters=channels, strides=(2, 2), padding='same', activation=tf.nn.tanh)
+		print(batch_norm4.shape)
+		output=tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4,4], filters=channels, strides=(1, 1), padding='same', activation=tf.nn.tanh)
 		#batch size, 64, 64, 3
+		print(output.shape)
 		return output
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
@@ -185,7 +188,6 @@ with tf.Session() as sess:
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
 gen_samples = np.array(gen_samples)
-print(gen_samples.shape)
 np.save("first", gen_samples[0])
 np.save("last", gen_samples[epochs-1])
 
