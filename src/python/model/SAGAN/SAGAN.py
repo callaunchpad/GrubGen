@@ -2,19 +2,16 @@ import tensorflow as tf
 import time
 import numpy as np
 import os
+import scipy
 #import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
-sys.path.insert(0, "/../../dataloader")
-print(sys.path)
-import os
-a = os.listdir()
-#from dataloader import DataLoader
+sys.path.insert(0, "../../dataloader")
+# print(sys.path)
+# import os
+# from dataloader import DataLoader
 from PIL import Image
 
-
-
-#mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
 
 
@@ -89,7 +86,7 @@ tf.reset_default_graph()
 
 num_batches=30
 batch_size=5
-epochs=100
+epochs=15
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
 z=tf.placeholder(tf.float32,shape=[batch_size, 1, 1, 100], name='noise')
@@ -142,7 +139,7 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			baklava_imgs = np.load("./baklava.npy")
+			baklava_imgs = np.load("baklava.npy")
 			batch_images = baklava_imgs[:batch_size]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
@@ -181,8 +178,8 @@ with tf.Session() as sess:
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
-np.save(gen_samples[0], "first")
-np.save(gen_samples[epochs-1], "last")
+np.save("first", gen_samples[0])
+np.save("last", gen_samples[epochs-1])
 
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
