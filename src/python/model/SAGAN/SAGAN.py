@@ -1,11 +1,15 @@
 import tensorflow as tf
 import time
 import numpy as np
+import os
 #import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import sys
-sys.path.insert(0, '../../dataloader')
-from dataloader import DataLoader
+sys.path.insert(0, "/../../dataloader")
+print(sys.path)
+import os
+a = os.listdir()
+#from dataloader import DataLoader
 from PIL import Image
 
 
@@ -124,7 +128,7 @@ train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
 
 
-d = DataLoader(mode="cat")
+# d = DataLoader(mode="cat")
 
 with tf.Session() as sess:
 
@@ -138,7 +142,8 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			batch_images = d.get_batch_type(batch_size, 2)[0]
+			baklava_imgs = np.load("./baklava.npy")
+			batch_images = baklava_imgs[:batch_size]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
@@ -172,10 +177,13 @@ with tf.Session() as sess:
 #reshaped_rgb = gen_samples[0].reshape(64, 64, 3)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
-#reshaped_rgb_last = gen_samples[epochs-1][4].reshape(64, 64, 3)
+
+#reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
-np.save('first_sagan_test.npy', gen_samples)
+np.save(gen_samples[0], "first")
+np.save(gen_samples[epochs-1], "last")
+
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
 # plt.imshow(gen_samples[epochs-1].reshape(64, 64, 3))
