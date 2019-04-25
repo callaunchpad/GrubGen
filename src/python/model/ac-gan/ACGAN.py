@@ -21,7 +21,7 @@ def one_hot(y_train):
         one[i] = 1
         res += [one]
     return res
-newx = []
+'''newx = []
 newy = []
 for i in range(len(x_train)):
     if (y_train[i] == 5 or y_train[i] == 1):
@@ -29,7 +29,7 @@ for i in range(len(x_train)):
         newx.append(x_train[i])
 x_train = newx
 y_train = newy
-
+'''
 
 y_train = one_hot(y_train)
 ### GAN section
@@ -124,7 +124,7 @@ lossgs = []
 with tf.Session() as sess:
     sess.run(init)
 
-    lrd = 0.00002
+    lrd = 0.00003
     lrg = 0.001
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
@@ -171,15 +171,15 @@ with tf.Session() as sess:
         lossgs.append(lg)
         lossds.append(ld)
         oz = []
-        #for i in range(10):
-        oz.append(5)
-        oz.append(1)
+        for i in range(10):
+            oz.append(i)
+        #oz.append(1)
         oz = one_hot(oz)
-        samplez=np.random.uniform(-1,1,size=(2,100))
+        samplez=np.random.uniform(-1,1,size=(10,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('ACGAN_data/samples5s1sAbhi3', np.array(samples))
-        np.save('ACGAN_data/discLoss5s1sAbhi3', np.array(lossds))
-        np.save('ACGAN_data/genLoss5s1sAbhi3', np.array(lossgs))
+        np.save('ACGAN_data/samplesAll1', np.array(samples))
+        np.save('ACGAN_data/discLossAll1', np.array(lossds))
+        np.save('ACGAN_data/genLossAll1', np.array(lossgs))
 
 
 
