@@ -125,7 +125,7 @@ with tf.Session() as sess:
     sess.run(init)
 
     lrd = 0.00003
-    lrg = 0.001
+    lrg = 0.003
     for epoch in range(epochs):
         num_batches = len(y_train)//batch_size
         ld = 0
@@ -162,8 +162,8 @@ with tf.Session() as sess:
             print("running gen")
 
             _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
-            if (g1 > d1*2):
-                _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
+            #if (g1 > d1*2):
+            _=sess.run(gtrainer,feed_dict={z:batch_z,y1:batch_y,y2:batch_y,y3:batch_y,lrG:lrg})
             
         print("Finished Epoch", epoch)
         print("Generator Loss:", lg)
@@ -177,9 +177,9 @@ with tf.Session() as sess:
         oz = one_hot(oz)
         samplez=np.random.uniform(-1,1,size=(10,100))
         samples.append(sess.run(generator(z,y1,reuse=True), feed_dict={z:samplez,y1:oz}))
-        np.save('ACGAN_data/samplesAll1', np.array(samples))
-        np.save('ACGAN_data/discLossAll1', np.array(lossds))
-        np.save('ACGAN_data/genLossAll1', np.array(lossgs))
+        np.save('ACGAN_data/samplesAll2', np.array(samples))
+        np.save('ACGAN_data/discLossAll2', np.array(lossds))
+        np.save('ACGAN_data/genLossAll2', np.array(lossgs))
 
 
 
