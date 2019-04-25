@@ -25,8 +25,8 @@ def generator(z, reuse=None):
 		keep_prob=0.6
 		momentum = 0.99
 		#is_training=True
-		hidden0=tf.layers.dense(z, 16*16*256)
-		hidden0 = tf.reshape(hidden0, (-1, 16, 16, 256))
+		hidden0=tf.layers.dense(z, 32*32*256)
+		hidden0 = tf.reshape(hidden0, (-1, 32, 32, 256))
 		hidden0 = tf.nn.leaky_relu(hidden0)
 		hidden2=tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=512, strides=2, padding='same')
 		batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
@@ -43,7 +43,7 @@ def generator(z, reuse=None):
 		hidden3=tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=[4,4], filters=256, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
 		#batch size, 16, 16, 256
-		hidden4=tf.layers.conv2d(inputs=batch_norm3, kernel_size=[4,4], filters=128, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
+		hidden4=tf.layers.conv2d(inputs=batch_norm3, kernel_size=[4,4], filters=256, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #batch size, 32, 32, 128
 		print(batch_norm4.shape)
