@@ -94,7 +94,7 @@ tf.reset_default_graph()
 
 
 num_batches=30
-batch_size=5
+batch_size=10
 epochs=15
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels], name='real_images')
@@ -188,8 +188,8 @@ with tf.Session() as sess:
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
 gen_samples = np.array(gen_samples)
-np.save("first", gen_samples[0])
-np.save("last", gen_samples[epochs-1])
+np.save("first", gen_samples[0][batch_size-1])
+np.save("last", gen_samples[epochs-1][batch_size-1])
 
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
