@@ -149,9 +149,9 @@ with tf.Session() as sess:
             #if (g1 > 2*d1):
                 #lrg = 0.001
                 #lrd = 0.00001
-            #if (g1 < 2 and d1 < 2):
-            #    lrd = 0.00001
-            #    lrg = 0.0001
+            if (g1 < 0.9 and d1 < 0.9):
+                lrd = 0.000006
+                lrg = 0.0003
             #if (g1*2 < d1):
                 #lrd = 0.0001
             ld += d1/num_batches
