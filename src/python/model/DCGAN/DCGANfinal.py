@@ -8,17 +8,17 @@ sys.path.insert(0, '../../dataloader')
 #from dataloader import get_batch, load_files
 from PIL import Image
 
-batch_size = 28
+batch_size = 20
 epochs= 40
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+#(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-x_train = x_train[y_train[:,0]==1]
-print ("Training shape: {}".format(x_train.shape))
+#x_train = x_train[y_train[:,0]==1]
+#print ("Training shape: {}".format(x_train.shape))
 
-x_train = (x_train - 127.5)/127.5
+#x_train = (x_train - 127.5)/127.5
 
 
 
@@ -45,8 +45,8 @@ def generator(z,training, reuse=None):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
         keep_prob=0.6
         momentum = 0.99
-        hidden0=tf.layers.dense(z, 16*16*256)
-        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 256))
+        hidden0=tf.layers.dense(z, 32*32*256)
+        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 256))
         hidden0 = tf.nn.leaky_relu(hidden0)
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
@@ -124,7 +124,7 @@ def discriminator(x, reuse=None):
 
 tf.reset_default_graph()
 
-real_images=tf.placeholder(tf.float32,shape=[None, 32, 32, channels])
+real_images=tf.placeholder(tf.float32,shape=[None, 64, 64, channels])
 z=tf.placeholder(tf.float32,shape=[None, 100])
 training=tf.placeholder(tf.bool)
 
@@ -203,9 +203,9 @@ with tf.Session() as sess:
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            rl_images = np.load("../../../../resources/processed/baklava.npy")
+            rl_images = np.load("baklava.npy")
             rl_images = (rl_images - 127.5) / 127.5
-            batch_images = x_train[i*batch_size:(i+1)*batch_size]
+            batch_images = rl_images[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
     
@@ -237,7 +237,7 @@ with tf.Session() as sess:
 
 
 reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_CIFAR_from_my_gan3', gen_samples)
+np.save('gen_samples_bakalava', gen_samples)
 img = Image.fromarray(reshaped_rgb, 'RGB')
 img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
