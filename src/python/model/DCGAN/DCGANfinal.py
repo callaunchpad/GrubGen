@@ -182,10 +182,10 @@ train_hist['total_ptime'] = []
 
 #load_files()
 
-#rl_images = np.load("../../../../resources/processed/baklava.npy")
-#rl_images = (rl_images - 127.5) / 127.5
+rl_images = np.load("baklava.npy")
+rl_images = (rl_images - 127.5) / 127.5
 
-print(x_train.shape)
+#print(x_train.shape)
 
 
 with tf.Session() as sess:
@@ -199,12 +199,10 @@ with tf.Session() as sess:
         D_losses_fake=[]
         G_losses=[]
         print('starting epoch %d ...' % (epoch + 1))
-        for i in range(x_train.shape[0]//batch_size):
+        for i in range(rl_images.shape[0]//batch_size):
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            rl_images = np.load("baklava.npy")
-            rl_images = (rl_images - 127.5) / 127.5
             batch_images = rl_images[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
