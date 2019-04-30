@@ -31,11 +31,13 @@ class ACGAN_Model:
         self.samples = []
         self.lossds = []
         self.lossgs = []
+        epochs=100
         self.model_init()
-    
+
+
     def model_init(self):
         self.real_images = tf.placeholder(tf.float32, shape=[self.batch_size, 64, 64, 1])
-        self.real_images += tf.random_normal(shape=tf.shape(self.real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32) 
+        self.real_images += tf.random_normal(shape=tf.shape(self.real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32)
         self.z = tf.placeholder(tf.float32, shape=[None, 100])
         self.y1 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
         self.y2 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
@@ -73,8 +75,8 @@ class ACGAN_Model:
             hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
             hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
             hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
-            
-            
+
+
             concat = tf.concat([hidden1_im, hidden2_y], 1)
             concat_dense = tf.layers.dense(inputs=concat, units=4*4*1024, activation = tf.nn.leaky_relu)
             preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
@@ -85,9 +87,9 @@ class ACGAN_Model:
             conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=1024, strides=(1,1),padding='valid')
             conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
             conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-            output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=1,strides=(2,2), padding='same')
+            output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
             return output
-    
+
     def discriminator(self, img, reuse=None):
         with tf.variable_scope('dis',reuse=reuse):
             hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=1024, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
@@ -98,7 +100,7 @@ class ACGAN_Model:
             output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
 
             dense_0 = tf.layers.dense(inputs=output_im, units=256, activation=tf.nn.leaky_relu)
-            
+
             dense_1f = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
             dense_1c = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
             logits = tf.layers.dense(dense_1f, units=1)
@@ -126,13 +128,13 @@ class ACGAN_Model:
                     batch_z=np.random.uniform(-1,1,size=(batch_size,100))
                     d1 = sess.run(self.dloss, feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
                     g1 = sess.run(self.gloss, feed_dict={self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
-                    drl = sess.run(self.drealloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})           
-                    dfl = sess.run(self.dfakeloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})           
-                    drcl = sess.run(self.drealclassloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})           
-                    dfcl = sess.run(self.dfakeclassloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})           
-                    
-                    
-                    
+                    drl = sess.run(self.drealloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
+                    dfl = sess.run(self.dfakeloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
+                    drcl = sess.run(self.drealclassloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
+                    dfcl = sess.run(self.dfakeclassloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
+
+
+
                     #if (g1 > 2*d1):
                         #lrg = 0.001
                         #lrd = 0.00001
@@ -150,7 +152,7 @@ class ACGAN_Model:
                     _=sess.run(self.gtrainer,feed_dict={self.z:batch_z,self.y1:batch_y,self.y2:batch_y,self.lrG:lrg})
                     #if (g1 > d1*2):
                     _=sess.run(self.gtrainer,feed_dict={self.z:batch_z,self.y1:batch_y,self.y2:batch_y,self.lrG:lrg})
-                    
+
                 print("Finished Epoch", epoch)
                 print("Generator Loss:", lg)
                 print("Discriminator Loss:", ld)
@@ -177,7 +179,7 @@ class ACGAN_Model:
             samplez=np.random.uniform(-1,1,size=(self.num_classes,100))
             ret = sess.run(self.generator(self.z,self.y1,reuse=True), feed_dict={self.z:samplez,self.y1:oz})
             np.save('ACGAN_generate/' + save_file, np.array(ret))
-    
+
     def one_hot(y):
         res = []
         for i in y:
@@ -185,30 +187,3 @@ class ACGAN_Model:
             one[i] = 1
             res += [one]
         return res
-
-
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-x_train = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_train], axis=3)
-x_test = np.expand_dims([scipy.misc.imresize(i, (64, 64, 1)) for i in x_test], axis=3)
-batch_size=200
-digits = [i for i in range(10)]
-
-
-y_train = ACGAN_Model.one_hot(y_train)
-y_test = ACGAN_Model.one_hot(y_test)
-
-model = ACGAN_Model(x_train, y_train, x_test, y_test)
-model.train("testingClass", 1)
-
-
-
-
-
-
-
-
-
-
-
-
-epochs=100
