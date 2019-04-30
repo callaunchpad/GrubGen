@@ -203,8 +203,8 @@ with tf.Session() as sess:
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            #rl_images = np.load("../../../../resources/processed/baklava.npy")
-            #rl_images = (rl_images - 127.5) / 127.5
+            rl_images = np.load("../../../../resources/processed/baklava.npy")
+            rl_images = (rl_images - 127.5) / 127.5
             batch_images = x_train[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
