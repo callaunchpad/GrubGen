@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 20
-epochs= 40
+epochs= 100
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -147,12 +147,12 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
-D_loss = (D_real_loss + D_fake_loss) * 0.5
+D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.0004
-lr_d = 0.0002
+lr_d = 0.0004
 
 
 tvars = tf.trainable_variables()
@@ -234,10 +234,10 @@ with tf.Session() as sess:
 
 
 
-reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava', gen_samples)
-img = Image.fromarray(reshaped_rgb, 'RGB')
-img.show()
+#reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
+np.save('gen_samples_bakalava3', gen_samples)
+#img = Image.fromarray(reshaped_rgb, 'RGB')
+#img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
 #np.save('reshaped_rgb_last_no_freeze3', reshaped_rgb_last)
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
