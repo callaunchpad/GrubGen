@@ -34,4 +34,4 @@ dl = DataLoader("cat")
 
 x_train, y_train = add_multiple_classes([1, 2, 3])
 model = ACGAN_Model(x_train, y_train, np.array([]), np.array([]), num_classes=101)
-model.train("testingFood")
+model.train("GrubGen3lrd0.001lrg0.0001")
