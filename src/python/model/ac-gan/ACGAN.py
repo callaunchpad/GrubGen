@@ -108,14 +108,12 @@ class ACGAN_Model:
             classes_logits = tf.layers.dense(dense_1c, units=self.num_classes)
             return logits, output, classes_logits #classes_output
 
-    def train(self,save_file, epochs=20):
+    def train(self,save_file, epochs=20, lrg=0.001, lrd=0.0001):
         init=tf.global_variables_initializer()
 
         with tf.Session() as sess:
             sess.run(init)
 
-            lrd = 0.0001
-            lrg = 0.001
             for epoch in range(epochs):
                 num_batches = len(self.y_train)//self.batch_size
                 ld = 0
