@@ -161,9 +161,9 @@ class ACGAN_Model:
                 for i in range(self.num_classes):
                     oz.append(i)
                 #oz.append(1)
-                oz = one_hot(oz)
+                oz = self.one_hot(oz)
                 samplez=np.random.uniform(-1,1,size=(self.num_classes,100))
-                self.samples.append(sess.run(self.generator(self.z,self.y1,reuse=True), feed_dict={z:samplez,y1:oz}))
+                self.samples.append(sess.run(self.generator(self.z, self.y1, reuse=True), feed_dict={self.z:samplez,self.y1:oz}))
                 np.save('ACGAN_data/' + save_file, np.array(self.samples))
                 np.save('ACGAN_data/' + save_file, np.array(self.lossds))
                 np.save('ACGAN_data/' + save_file, np.array(self.lossgs))
@@ -174,15 +174,15 @@ class ACGAN_Model:
             for i in range(self.num_classes):
                 oz.append(i)
             #oz.append(1)
-            oz = one_hot(oz)
+            oz = self.one_hot(oz)
             samplez=np.random.uniform(-1,1,size=(self.num_classes,100))
-            ret = sess.run(self.generator(self.z,self.y1,reuse=True), feed_dict={self.z:samplez,self.y1:oz})
+            ret = sess.run(self.generator(self.z, self.y1, reuse=True), feed_dict={self.z:samplez,self.y1:oz})
             np.save('ACGAN_generate/' + save_file, np.array(ret))
 
-    def one_hot(y):
+    def one_hot(self, y):
         res = []
         for i in y:
-            one = [0 for i in range(10)]
+            one = [0 for j in range(self.num_classes)]
             one[i] = 1
             res += [one]
         return res
