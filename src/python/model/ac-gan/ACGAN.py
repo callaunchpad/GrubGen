@@ -167,9 +167,9 @@ class ACGAN_Model:
                 oz = self.one_hot(oz)
                 samplez=np.random.uniform(-1,1,size=(self.num_classes,100))
                 self.samples.append(sess.run(self.generator(self.z, self.y1, reuse=True), feed_dict={self.z:samplez,self.y1:oz}))
-                np.save('ACGAN_data/' + save_file, np.array(self.samples))
-                np.save('ACGAN_data/' + save_file, np.array(self.lossds))
-                np.save('ACGAN_data/' + save_file, np.array(self.lossgs))
+                np.save('ACGAN_data/samples' + save_file, np.array(self.samples))
+                np.save('ACGAN_data/discLoss' + save_file, np.array(self.lossds))
+                np.save('ACGAN_data/genLoss' + save_file, np.array(self.lossgs))
 
     def generate(self, save_file):
         with tf.Session() as sess:
