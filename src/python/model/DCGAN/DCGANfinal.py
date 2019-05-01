@@ -55,9 +55,10 @@ def generator(z,training, reuse=None):
         hidden3=conv2d(inputs=batch_norm2, kernel=5, filters=256, strides=1, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3, is_training=training)
         hidden4 = conv2d_transpose(batch_norm3, kernel=5, filters=256, strides=2, padding='same')
-        hidden4=conv2d(inputs=batch_norm3, kernel=5, filters=128, strides=1, padding='same')
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
-        output= tf.nn.tanh(conv2d(inputs=batch_norm4, kernel=5, filters=channels, strides=1, padding='same'))
+        hidden5=conv2d(inputs=batch_norm4, kernel=5, filters=128, strides=1, padding='same')
+        batch_norm5 = leaky_on_batch_norm(hidden5, is_training=training)
+        output= tf.nn.tanh(conv2d(inputs=batch_norm5, kernel=5, filters=channels, strides=1, padding='same'))
         return output
         """
 
