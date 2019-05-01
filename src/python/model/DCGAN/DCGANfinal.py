@@ -45,15 +45,16 @@ def generator(z,training, reuse=None):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
         keep_prob=0.6
         momentum = 0.99
-        hidden0=tf.layers.dense(z, 32*32*256)
-        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 256))
+        hidden0=tf.layers.dense(z, 16*16*512)
+        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
-        hidden2=conv2d_transpose(inputs=hidden0, kernel=5, filters=256, strides=2, padding='same')
+        hidden2=conv2d_transpose(inputs=hidden0, kernel=5, filters=512, strides=2, padding='same')
         batch_norm2 = leaky_on_batch_norm(hidden2, is_training=training)
-        hidden3=conv2d(inputs=batch_norm2, kernel=5, filters=128, strides=1, padding='same')
+        hidden3=conv2d(inputs=batch_norm2, kernel=5, filters=256, strides=1, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3, is_training=training)
+        hidden4 = conv2d_transpose(batch_norm3, kernel=5, filters=256, strides=2, padding='same')
         hidden4=conv2d(inputs=batch_norm3, kernel=5, filters=128, strides=1, padding='same')
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
         output= tf.nn.tanh(conv2d(inputs=batch_norm4, kernel=5, filters=channels, strides=1, padding='same'))
@@ -235,7 +236,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava3', gen_samples)
+np.save('gen_samples_bakalava2', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
