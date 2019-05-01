@@ -114,8 +114,8 @@ class ACGAN_Model:
         with tf.Session() as sess:
             sess.run(init)
 
-            lrd = 0.00003
-            lrg = 0.003
+            lrd = 0.0001
+            lrg = 0.001
             for epoch in range(epochs):
                 num_batches = len(self.y_train)//self.batch_size
                 ld = 0
@@ -137,9 +137,9 @@ class ACGAN_Model:
                     #if (g1 > 2*d1):
                         #lrg = 0.001
                         #lrd = 0.00001
-                    if (g1 < 0.9 and d1 < 0.9):
-                        lrd = 0.000006
-                        lrg = 0.0003
+                    #if (g1 < 0.9 and d1 < 0.9):
+                        #lrd = 0.000006
+                        #lrg = 0.0003
                     #if (g1*2 < d1):
                         #lrd = 0.0001
                     ld += d1/num_batches
