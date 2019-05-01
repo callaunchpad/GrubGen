@@ -5,10 +5,9 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-
 class DataLoader:
     def __init__(self, mode="random", shuffle=True):
-        print("Initializing dataloader")
+        print("Initializing", mode, "dataloader")
         assert mode=="random" or mode == "cat", ("Unrecognized mode,", mode)
         self.mode = mode
         self.resources = self.find_resources_path()
@@ -25,7 +24,7 @@ class DataLoader:
         elif self.mode == "cat":
             self.curr_lst = [0] * len(self.images_lst)
 
-        print("Done initializing dataloader")
+        print("Done initializing", mode, "dataloader")
 
     def shuffle_data(self):
         if self.mode == "random":
@@ -45,7 +44,7 @@ class DataLoader:
         #loads the .npy files
         index = 0
         temp_imgs = []
-        
+
         for file_name in os.listdir(self.path):
             if file_name.endswith(".npy"):
                 file_path = self.path + "/" + file_name
@@ -72,7 +71,7 @@ class DataLoader:
     def get_batch(self, size):
         if self.mode == "cat":
             print("This dataloader was configured as a categorical loader, does not support get_batch")
-            a = 1/0
+            raise Exception
 
         if self.curr + size >= self.num_pts:
             self.curr = 0
@@ -84,13 +83,15 @@ class DataLoader:
     def get_batch_type(self, size, cat_index):
         if self.mode == "random":
             print("This dataloader was configured as a random loader, does not support get_batch_type")
-            a = 1/0
+            raise Exception
 
-        cat_num_pts = self.images_lst[i].shape[0]
-        if self.curr_lst[cat_index] + size >= cat_num_pts:
+        cat_num_pts = self.images_lst[cat_index].shape[0]
+        curr = self.curr_lst[cat_index]
+        if curr + size >= cat_num_pts:
+            curr = 0
             self.curr_lst[cat_index] = 0
 
-        ret = self.images_lst[i][self.curr:self.curr + size], self.one_hots_lst[i][0:size]
+        ret = self.images_lst[cat_index][curr:curr + size], self.one_hots_lst[cat_index][0:size]
         self.curr_lst[cat_index] += size
         return ret
 
@@ -98,6 +99,6 @@ class DataLoader:
         cwd = os.getcwd()
         gg_idx = cwd.index("src")
         new_wd = cwd[gg_idx:]
-        num_slash = new_wd.count("\\") + 1
+        num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1 #max to account for windows vs unix
         pathing = "../" * num_slash + "resources"
         return pathing

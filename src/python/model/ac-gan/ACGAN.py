@@ -36,7 +36,7 @@ class ACGAN_Model:
 
 
     def model_init(self):
-        self.real_images = tf.placeholder(tf.float32, shape=[self.batch_size, 64, 64, 1])
+        self.real_images = tf.placeholder(tf.float32, shape=[self.batch_size, 64, 64, 3])
         self.real_images += tf.random_normal(shape=tf.shape(self.real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32)
         self.z = tf.placeholder(tf.float32, shape=[None, 100])
         self.y1 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
@@ -118,14 +118,14 @@ class ACGAN_Model:
             lrd = 0.00003
             lrg = 0.003
             for epoch in range(epochs):
-                num_batches = len(self.y_train)//batch_size
+                num_batches = len(self.y_train)//self.batch_size
                 ld = 0
                 lg = 0
                 for i in range(num_batches):
-                    batch_im, batch_y = self.x_train[i*batch_size:(i+1)*batch_size], self.y_train[i*batch_size:(i+1)*batch_size]#get_batch(batch_size)
+                    batch_im, batch_y = self.x_train[i*self.batch_size:(i+1)*self.batch_size], self.y_train[i*self.batch_size:(i+1)*self.batch_size]#get_batch(batch_size)
                     batch_im = batch_im
 
-                    batch_z=np.random.uniform(-1,1,size=(batch_size,100))
+                    batch_z=np.random.uniform(-1,1,size=(self.batch_size,100))
                     d1 = sess.run(self.dloss, feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
                     g1 = sess.run(self.gloss, feed_dict={self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
                     drl = sess.run(self.drealloss,feed_dict={self.real_images:batch_im,self.z:batch_z,self.y1:batch_y,self.y2:batch_y})
