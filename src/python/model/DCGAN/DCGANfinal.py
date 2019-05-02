@@ -43,8 +43,6 @@ def leaky_on_batch_norm(inputs, is_training=True):
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
-        keep_prob=0.6
-        momentum = 0.99
         hidden0=tf.layers.dense(z, 16*16*512)
         hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
