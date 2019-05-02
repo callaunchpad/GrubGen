@@ -3,80 +3,101 @@
 
 import os
 import numpy as np
-import random
-import matplotlib
-matplotlib.use('agg')
-from matplotlib import pyplot as plt
 
-resources = "../../../../resources"
-path = resources + "/processed"
+class DataLoader:
+    def __init__(self, mode="random", shuffle=True):
+        print("Initializing", mode, "dataloader")
+        assert mode=="random" or mode == "cat", ("Unrecognized mode,", mode)
+        self.mode = mode
+        self.resources = self.find_resources_path()
+        self.path = self.resources + "/processed"
 
-food_paths = [] # maps index for onehot vector to food file path
-food_names = [] # maps index to food name
+        self.load_files()
 
-# print("current working directory:")
-# print(os.getcwd())
+        if shuffle:
+            self.shuffle_data()
 
-def load_files():
-    index = 0
-    for file_name in os.listdir(path):
-        if file_name.endswith(".npy"):
-            # print(file_name)
-            food_paths.append(path + "/" + file_name) # string: path of file name
-            food_names.append(file_name[0:(len(file_name)-4)])
-    print(food_paths)
-    print(food_names)
+        #Compute batch pointers
+        if self.mode == "random":
+            self.curr = 0
+        elif self.mode == "cat":
+            self.curr_lst = [0] * len(self.images_lst)
 
-# print("FOOD PATHS:")
-# print(food_paths)
-# print("FOOD NAMES:")
-# print(food_names)
+        print("Done initializing", mode, "dataloader")
 
-# one_hot = np.array([0 for file in os.listdir(path)])
-one_hot = np.zeros(len(os.listdir(path))).astype(np.int)
+    def shuffle_data(self):
+        if self.mode == "random":
+                self.num_pts = self.images.shape[0]
+                p = np.random.permutation(self.num_pts)
+                print("Total of", self.num_pts, "images loaded into memory")
+                self.images = self.images[p]
+                self.onehots = self.onehots[p]
 
-def get_batch(size):
-    batch_one_hots = []
-    batch = np.zeros((size, 64*64*3))
-    for i in range(0, size):
-        batch_vector = one_hot.copy()
-        img, cat_index = random_gen()
-        batch[i] = img
-        batch_vector[cat_index] = 1
-        batch_one_hots.append(batch_vector)
-    return batch, batch_one_hots
+        elif self.mode == "cat":
+            for i in range(len(self.images_lst)):
+                num = self.images_lst[i].shape[0]
+                p = np.random.permutation(num)
+                self.images_lst[i] = self.images_lst[i][p]
 
-def random_gen():
-    # random category
-    cat_index = random.randint(0, len(food_paths) - 1)
-    # print(cat_index)
-    cat_file = np.load(food_paths[cat_index])
-    cat_file = np.reshape(cat_file, (cat_file.shape[0], -1))
+    def load_files(self):
+        #loads the .npy files
+        index = 0
+        temp_imgs = []
 
-    # random image from category
-    img_index = random.randint(0, cat_file.shape[0]-1)
+        for file_name in os.listdir(self.path):
+            if file_name.endswith(".npy"):
+                file_path = self.path + "/" + file_name
+                data = np.load(file_path)
+                temp_imgs.append(data)
+                print("Loaded", file_name, "\t\t with index", index, "and", data.shape[0], "imgs")
+                index += 1
 
-    # img is in pixels, of size 3*64*64 by 1
-    img = cat_file[img_index, :]
-    return img, cat_index
+        temp_onehot = []
+        for i, data in enumerate(temp_imgs):
+            num_pts = data.shape[0]
+            one_hot = np.zeros(index)
+            one_hot[i] = 1
+            one_hots = np.tile(one_hot, [num_pts, 1])
+            temp_onehot.append(one_hots)
 
+        if self.mode == "random":
+            self.images = np.vstack(temp_imgs)
+            self.onehots = np.vstack(temp_onehot)
+        elif self.mode == "cat":
+            self.images_lst = temp_imgs
+            self.one_hots_lst = temp_onehot #hope is that more memory storage but faster speed
 
-if __name__ == '__main__':
-    load_files()
-    # testing
-    print(one_hot)
-    b, boh = get_batch(30)
-    # print(food_paths)
-    # print(food_names)
-    # print(b)
-    # print(boh)
-    #
-    # to show images in batch:
-    count = 0
-    for i in b:
-        img = np.reshape(i, (64, 64, 3))
-        img /= 255
-        plt.imshow(img)
-        count += 1
+    def get_batch(self, size):
+        if self.mode == "cat":
+            print("This dataloader was configured as a categorical loader, does not support get_batch")
+            raise Exception
 
-        plt.show()
+        if self.curr + size >= self.num_pts:
+            self.curr = 0
+
+        ret = self.images[self.curr:self.curr + size], self.onehots[self.curr:self.curr + size]
+        self.curr += size
+        return ret
+
+    def get_batch_type(self, size, cat_index):
+        if self.mode == "random":
+            print("This dataloader was configured as a random loader, does not support get_batch_type")
+            raise Exception
+
+        cat_num_pts = self.images_lst[cat_index].shape[0]
+        curr = self.curr_lst[cat_index]
+        if curr + size >= cat_num_pts:
+            curr = 0
+            self.curr_lst[cat_index] = 0
+
+        ret = self.images_lst[cat_index][curr:curr + size], self.one_hots_lst[cat_index][0:size]
+        self.curr_lst[cat_index] += size
+        return ret
+
+    def find_resources_path(self):
+        cwd = os.getcwd()
+        gg_idx = cwd.index("src")
+        new_wd = cwd[gg_idx:]
+        num_slash = max(new_wd.count("\\"), new_wd.count("/")) + 1 #max to account for windows vs unix
+        pathing = "../" * num_slash + "resources"
+        return pathing
