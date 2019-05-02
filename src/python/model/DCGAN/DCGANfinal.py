@@ -43,23 +43,19 @@ def leaky_on_batch_norm(inputs, is_training=True):
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
-<<<<<<< HEAD
-        hidden0=tf.layers.dense(z, 16*16*512)
-        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
-=======
+
         keep_prob=0.6
         momentum = 0.99
-        hidden0=tf.layers.dense(z, 16*16*1024)
-        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 1024))
->>>>>>> e0abd46b51115a85e317cbd1a19e598743fb2922
+        hidden0=tf.layers.dense(z, 16*16*512)
+        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
         hidden2=conv2d_transpose(inputs=hidden0, kernel=5, filters=512, strides=2, padding='same')
         batch_norm2 = leaky_on_batch_norm(hidden2, is_training=training)
-        hidden3=conv2d(inputs=batch_norm2, kernel=5, filters=256, strides=1, padding='same')
+        hidden3 = conv2d_transpose(batch_norm2, kernel=5, filters=256, strides=2, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3, is_training=training)
-        hidden4 = conv2d_transpose(batch_norm3, kernel=5, filters=256, strides=2, padding='same')
+        hidden4=conv2d(inputs=batch_norm3, kernel=5, filters=256, strides=1, padding='same')
         batch_norm4 = leaky_on_batch_norm(hidden4, is_training=training)
         hidden5=conv2d(inputs=batch_norm4, kernel=5, filters=128, strides=1, padding='same')
         batch_norm5 = leaky_on_batch_norm(hidden5, is_training=training)
@@ -158,8 +154,8 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0008
-lr_d = 0.0008
+lr_g = 0.0004
+lr_d = 0.0004
 
 
 tvars = tf.trainable_variables()
