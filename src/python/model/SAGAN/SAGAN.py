@@ -84,7 +84,7 @@ def attention(x, channels):
 tf.reset_default_graph()
 
 num_batches=30
-batch_size=200
+batch_size=50
 epochs=40
 
 real_images=tf.placeholder(tf.float32,shape=[batch_size, 64, 64, channels])
@@ -138,7 +138,8 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
-			batch_images = get_batch(batch_size)[0]
+			#batch_images = get_batch(batch_size)[0]
+			batch_images = np.load("baklava.npy")[0:batch_size]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
@@ -161,7 +162,7 @@ with tf.Session() as sess:
 		train_hist['G_losses'].append(np.mean(G_losses))
 		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
 
-		sample_z=np.random.uniform(-1,1,size=(1, 1, 1, 100))
+		sample_z=np.random.uniform(-1,1,size=(batch_size, 1, 1, 100))
 		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
 
 		gen_samples.append(gen_sample)
