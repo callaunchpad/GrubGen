@@ -84,12 +84,9 @@ class ACGAN_Model:
             #conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
             #conv0b = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
             conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=1024, strides=(1,1),padding='valid')
-            batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv1))
-            conv2 = tf.layers.conv2d_transpose(batch_norm1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
-            batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv2))
-            conv3 = tf.layers.conv2d_transpose(batch_norm2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-            batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv3))
-            output = tf.layers.conv2d_transpose(batch_norm3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
+            conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
+            conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
+            output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
             return output
 
     def discriminator(self, img, reuse=None):
