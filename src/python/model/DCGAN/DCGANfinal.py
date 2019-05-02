@@ -46,14 +46,14 @@ def dropout(inputs, keep_prob):
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
-        hidden0= tf.layers.dense(z, 16*16*128)
-        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 128))
+        hidden0= tf.layers.dense(z, 32*32*256)
+        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 256))
         hidden0 = tf.nn.leaky_relu(hidden0)
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
-        hidden2=conv2d_transpose(inputs=hidden0, kernel=5, filters=128, strides=2, padding='same')
+        hidden2=conv2d(inputs=hidden0, kernel=5, filters=256, strides=1, padding='same')
         batch_norm2 = leaky_on_batch_norm(hidden2, is_training=training)
-        batch_norm2 = tf.nn.dropout(batch_norm2, 0.5)
+        batch_norm2 = tf.nn.dropout(batch_norm2, 0.4)
         hidden3 = conv2d_transpose(batch_norm2, kernel=5, filters=128, strides=2, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3, is_training=training)
         hidden4=conv2d(inputs=batch_norm3, kernel=5, filters=128, strides=1, padding='same')
@@ -92,12 +92,13 @@ def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         momentum = 0.99
         hidden1 = conv2d(inputs=X, kernel=3, filters=128, strides=1, padding='same')
-        hidden1 = leaky_on_batch_norm(hidden1)
-        hidden2 = conv2d(inputs=hidden1, kernel=4, filters=128,strides=2, padding='same')
+        #hidden1 = leaky_on_batch_norm(hidden1)
+        hidden2 = conv2d(inputs=hidden1, kernel=4, filters=256,strides=2, padding='same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         batch_norm2 = dropout(batch_norm2, 0.4)
-        hidden3 = conv2d(inputs=batch_norm2, kernel=4, filters=128,strides=2, padding='same')
+        hidden3 = conv2d(inputs=batch_norm2, kernel=4, filters=256,strides=2, padding='same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
+        batch_norm3 = dropout(batch_norm3, 0.4)
         logits = conv2d(inputs=batch_norm3, kernel=4, filters=128, strides=2, padding='same')
         logits = tf.layers.flatten(logits)
         logits = tf.nn.dropout(logits, 0.4)
@@ -243,7 +244,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_dropout', gen_samples)
+np.save('gen_samples_bakalava_dropout2', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
