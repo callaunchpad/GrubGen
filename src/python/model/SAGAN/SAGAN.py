@@ -9,7 +9,8 @@ import sys
 sys.path.insert(0, "../../dataloader")
 # print(sys.path)
 # import os
- from dataloader import DataLoader
+
+from dataloader import DataLoader
 from PIL import Image
 
 
@@ -25,6 +26,7 @@ def generator(z, reuse=None):
 		keep_prob=0.6
 		momentum = 0.99
 		#is_training=True
+
 		hidden0=tf.layers.dense(z, 16*16*512)
 		hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
 		hidden0 = tf.nn.leaky_relu(hidden0)
@@ -43,10 +45,12 @@ def generator(z, reuse=None):
 		# batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
 		# #batch size, 8, 8, 512
 
+
 		batch_norm3_attention = attention(batch_norm3, 512)
 
 		#batch size, 16, 16, 256
 		hidden4=tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4,4], filters=256, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
+
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #batch size, 32, 32, 128
 		print(batch_norm4.shape)
@@ -96,6 +100,7 @@ def attention(x, channels):
 tf.reset_default_graph()
 
 
+
 num_batches=30
 batch_size=10
 epochs=15
@@ -110,6 +115,7 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 def loss_func(logits_in, labels_in):
 	return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
 
+
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 D_loss = (D_real_loss + D_fake_loss)
@@ -117,6 +123,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
 lr = 0.004
+
 
 tvars = tf.trainable_variables()
 d_vars=[var for var in tvars if 'dis' in var.name]
@@ -151,9 +158,11 @@ with tf.Session() as sess:
 		for i in range(num_batches):
 			train_g=True
 			train_d=True
+
 			batch_images = d.get_batch(batch_size)[0]
 			batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
 			batch_z=np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
+
 			loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
 			D_losses.append(loss_d_)
 			z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
@@ -174,7 +183,9 @@ with tf.Session() as sess:
 		train_hist['G_losses'].append(np.mean(G_losses))
 		train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
 
+
 		sample_z=np.random.uniform(-1,1,size=(batch_size, 1, 1, 100))
+
 		gen_sample=sess.run(generator(z, reuse=True), feed_dict={z:sample_z})
 
 		gen_samples.append(gen_sample)
@@ -190,8 +201,10 @@ with tf.Session() as sess:
 #img_last = Image.fromarray(reshaped_rgb_last, 'RGB')
 #img_last.show()
 gen_samples = np.array(gen_samples)
-np.save("first", gen_samples[0][batch_size-1])
-np.save("last", gen_samples[epochs-1][batch_size-1])
+
+# gen_samples shape = [epochs, 1, 64, 64, 3]
+np.save('first.npy', gen_samples[0])
+np.save('last.npy', gen_samples[epochs-1])
 
 # plt.imshow(gen_samples[0].reshape(64, 64, 3))
 # plt.show()
