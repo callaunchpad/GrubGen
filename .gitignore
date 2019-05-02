@@ -14,8 +14,6 @@
 *.ipynb_checkpoints
 resources/images/
 resources/processed/
-<<<<<<< HEAD
+src/python/model/ac-gan/ACGAN_data/
 resources/UPMC_Food101/
-=======
 .nfs*
->>>>>>> 325463db95e215b40d2cd99488983a1afa7ddf39

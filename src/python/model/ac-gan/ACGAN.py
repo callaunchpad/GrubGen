@@ -84,9 +84,12 @@ class ACGAN_Model:
             #conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
             #conv0b = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
             conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=1024, strides=(1,1),padding='valid')
-            conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
-            conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-            output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
+            batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv1))
+            conv2 = tf.layers.conv2d_transpose(batch_norm1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
+            batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv2))
+            conv3 = tf.layers.conv2d_transpose(batch_norm2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
+            batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(conv3))
+            output = tf.layers.conv2d_transpose(batch_norm3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
             return output
 
     def discriminator(self, img, reuse=None):
@@ -95,9 +98,10 @@ class ACGAN_Model:
             hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
             hidden2_im = tf.layers.conv2d(hidden1_pool,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
             hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
-            hidden2_pool = tf.layers.flatten(hidden2_pool)
-            output_im = tf.layers.dense(inputs=hidden2_pool, units=256, activation=tf.nn.leaky_relu)
-
+            hidden3_im = tf.layers.conv2d(hidden2_pool,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+            hidden3_pool = tf.layers.max_pooling2d(inputs=hidden3_im, pool_size=[2,2], strides=2)
+            hidden3_pool = tf.layers.flatten(hidden3_pool)
+            output_im = tf.layers.dense(inputs=hidden3_pool, units=256, activation=tf.nn.leaky_relu)
             dense_0 = tf.layers.dense(inputs=output_im, units=256, activation=tf.nn.leaky_relu)
 
             dense_1f = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
