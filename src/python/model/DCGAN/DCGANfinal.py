@@ -46,7 +46,7 @@ def generator(z,training, reuse=None):
 
         keep_prob=0.6
         momentum = 0.99
-        hidden0=tf.layers.dense(z, 16*16*512)
+        hidden0= tf.layers.dense(z, 16*16*512)
         hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
