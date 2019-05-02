@@ -41,6 +41,7 @@ class ACGAN_Model:
         self.y1 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
         self.y2 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
         g = self.generator(self.z, self.y1)
+        print(g)
         dreallog, _, drealclasses = self.discriminator(self.real_images)
         dfakelog, _, dfakeclasses = self.discriminator(g, reuse=True)
 
