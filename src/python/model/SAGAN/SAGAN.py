@@ -44,10 +44,8 @@ def generator(z, reuse=None):
 		# #batch size, 8, 8, 512
         print(batch_norm3.shape)
         batch_norm3_attention = attention(batch_norm3, 128)
-
 		#batch size, 16, 16, 256
 		hidden4=tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4,4], filters=256, strides=(1, 1), padding='same', activation=tf.nn.leaky_relu)
-
 		batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
         #batch size, 32, 32, 128
 		print(batch_norm4.shape)
