@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 20
-epochs= 100
+epochs= 60
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -38,6 +38,9 @@ def conv2d_transpose(inputs, kernel, filters, strides, padding):
 
 def leaky_on_batch_norm(inputs, is_training=True):
     return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
+
+def dropout(inputs, keep_prob):
+    return tf.nn.dropout(inputs, keep_prob)
 
 
 def generator(z,training, reuse=None):
@@ -100,8 +103,10 @@ def discriminator(X, reuse=None):
         logits = tf.nn.dropout(logits, 0.4)
         logits = tf.layers.dense(logits, 1)
         output=tf.sigmoid(logits)
-        return output, logits 
-        """
+        return output, logits
+
+"""
+
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
