@@ -32,6 +32,6 @@ def add_multiple_classes(classes):
 
 dl = DataLoader("cat")
 
-x_train, y_train = add_multiple_classes([1, 2, 3])
+x_train, y_train = add_multiple_classes([1])
 model = ACGAN_Model(x_train, y_train, np.array([]), np.array([]), num_classes=101, batch_size=50)
 model.train("GrubGen3lrg0.0001lrd0.0001", epochs=100, lrg=0.0001, lrd=0.0001)
