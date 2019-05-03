@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 20
-epochs= 150
+epochs= 60
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
