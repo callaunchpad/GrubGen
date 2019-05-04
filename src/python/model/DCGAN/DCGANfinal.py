@@ -46,15 +46,15 @@ def dropout(inputs, keep_prob):
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
-        hidden0= tf.layers.dense(z, 32*32*256)
+        hidden0= tf.layers.dense(z, 32*32*512)
         hidden0 = leaky_on_batch_norm(hidden0)
-        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 256))
+        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 512))
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
 
-        hidden2=conv2d(hidden0, 5, 256, 1, 'same')
+        hidden2=conv2d(hidden0, 5, 512, 1, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
-        #batch_norm2 = tf.nn.dropout(batch_norm2, 0.4)
+        #batch_norm2 = dropout(batch_norm2, 0.4)
 
         hidden3 = conv2d_transpose(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
@@ -102,14 +102,14 @@ def discriminator(X, reuse=None):
         batch_norm2 = dropout(batch_norm2, 0.4)
 
         hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
-        batch_norm3 = leaky_on_batch_norm(hidden3)
+        #batch_norm3 = leaky_on_batch_norm(hidden3)
         batch_norm3 = dropout(batch_norm3, 0.4)
 
         logits = conv2d(batch_norm3, 4, 256, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
-        logits = tf.nn.dropout(logits, 0.4)
+        #logits = tf.nn.dropout(logits, 0.4)
         logits = tf.layers.dense(logits, 1)
 
         output=tf.sigmoid(logits)
@@ -253,7 +253,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_dropout_our_gen4', gen_samples)
+np.save('gen_samples_bakalava_more_discrim_dropout', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
