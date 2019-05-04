@@ -13,6 +13,7 @@ from dataloader import DataLoader
 if __name__ == '__main__':
     d = DataLoader("random")
     b, boh = d.get_batch(1)
+
     count = 0
     for img, oh in zip(b, boh):
         print(img.shape, oh)
@@ -29,6 +30,7 @@ if __name__ == '__main__':
         count += 1
         plt.show()
 
+
     b, boh = d.get_batch_type(2, 30)
     count = 0
     for img, oh in zip(b, boh):
@@ -36,3 +38,4 @@ if __name__ == '__main__':
         plt.imshow(img)
         count += 1
         plt.show()
+
