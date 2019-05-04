@@ -110,11 +110,11 @@ def loss_func(logits_in, labels_in):
 
 D_real_loss = loss_func(D_logits_real,
                         tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0,
-                                                                        stddev=random.uniform(0.0, 0.1),
+                                                                        stddev=np.random.uniform(0.0, 0.1),
                                                                         dtype=tf.float32))
 D_fake_loss = loss_func(D_logits_fake,
                         tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0,
-                                                                       stddev=random.uniform(0.0, 0.1),
+                                                                       stddev=np.random.uniform(0.0, 0.1),
                                                                        dtype=tf.float32))
 D_loss = (D_real_loss + D_fake_loss)
 

@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d78f2ad1-b156-4835-9987-46c12055cedf" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../../../educational/GAN_practice.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../educational/GAN_practice.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../../educational/conv_practice.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../educational/conv_practice.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SAGAN.py" beforeDir="false" afterPath="$PROJECT_DIR$/SAGAN.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SAGAN.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="93" lean-forward="true" selection-start-line="93" selection-end-line="93" />
+            <state relative-caret-position="665">
+              <caret line="119" lean-forward="true" selection-start-line="119" selection-end-line="119" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -99,12 +97,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1557010476476</updated>
-      <workItem from="1557010478740" duration="726000" />
+      <workItem from="1557010478740" duration="797000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="726000" />
+    <option name="totallyTimeSpent" value="797000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1420" height="857" extended-state="0" />
@@ -139,8 +137,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/SAGAN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="93" lean-forward="true" selection-start-line="93" selection-end-line="93" />
+        <state relative-caret-position="665">
+          <caret line="119" lean-forward="true" selection-start-line="119" selection-end-line="119" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
