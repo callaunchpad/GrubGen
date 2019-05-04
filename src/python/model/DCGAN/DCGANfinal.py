@@ -30,10 +30,10 @@ def loss_func(logits_in, labels_in):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
 
 def conv2d(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
+    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))
 
 def conv2d_transpose(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding)
+    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))
 
 
 def leaky_on_batch_norm(inputs, is_training=True):
@@ -99,17 +99,17 @@ def discriminator(X, reuse=None):
 
         hidden2 = conv2d(hidden1, 4, 256, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
-        batch_norm2 = dropout(batch_norm2, 0.4)
+        #batch_norm2 = dropout(batch_norm2, 0.4)
 
         hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
-        batch_norm3 = dropout(batch_norm3, 0.4)
+        #batch_norm3 = dropout(batch_norm3, 0.4)
 
         logits = conv2d(batch_norm3, 4, 256, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
-        #logits = tf.nn.dropout(logits, 0.4)
+        logits = tf.nn.dropout(logits, 0.4)
         logits = tf.layers.dense(logits, 1)
 
         output=tf.sigmoid(logits)
@@ -253,7 +253,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_both_dropout', gen_samples)
+np.save('gen_samples_bakalava_different_kernel', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
