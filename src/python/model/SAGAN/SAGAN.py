@@ -45,7 +45,6 @@ def generator(z, reuse=None):
         print(output.shape)
     return output
 
-
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis', reuse=reuse):
         momentum = 0.99
