@@ -28,15 +28,17 @@ def generator(z, reuse=None):
         hidden0 = tf.layers.dense(z, 16 * 16 * 512)
         hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
+
         hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=256, strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
-        hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same',
-                                   activation=tf.nn.leaky_relu)
-        batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
+
+        hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
+        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
         batch_norm3_attention = attention(batch_norm3, 128)
-        hidden4 = tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4, 4], filters=256, strides=(1, 1),
-                                   padding='same', activation=tf.nn.leaky_relu)
-        batch_norm4 = tf.contrib.layers.batch_norm(hidden4, decay=momentum)
+
+        hidden4 = tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4, 4], filters=256, strides=(1, 1), padding='same')
+        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, decay=momentum))
+
         # batch size, 32, 32, 128
         print(batch_norm4.shape)
         output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1),
@@ -48,21 +50,19 @@ def generator(z, reuse=None):
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis', reuse=reuse):
         momentum = 0.99
-        hidden1 = tf.layers.conv2d(inputs=X, kernel_size=4, filters=128, strides=2, padding='same',
-                               activation=tf.nn.leaky_relu)
-        batch_norm1 = tf.contrib.layers.batch_norm(hidden1, decay=momentum)
+        hidden1 = tf.layers.conv2d(inputs=X, kernel_size=4, filters=128, strides=2, padding='same')
+        batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, decay=momentum))
         # batch size, 32, 32, 128
-        hidden2 = tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=256, strides=2, padding='same',
-                                   activation=tf.nn.leaky_relu)
-        batch_norm2 = tf.contrib.layers.batch_norm(hidden2, decay=momentum)
+        hidden2 = tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=256, strides=2, padding='same')
+        batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, decay=momentum))
         # batch size, 16, 16, 256
 
         batch_norm2_attention = attention(batch_norm2, 256)
 
-        hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=512, strides=2, padding='same',
-                                   activation=tf.nn.leaky_relu)
-        batch_norm3 = tf.contrib.layers.batch_norm(hidden3, decay=momentum)
+        hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=512, strides=2, padding='same')
+        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
         # batch size, 8, 8, 512
+
         logits = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
         # batch size, ?, ?, 1
         output = tf.sigmoid(logits)
@@ -153,7 +153,7 @@ with tf.Session() as sess:
             train_g = True
             train_d = True
 
-            batch_images = d.get_batch(batch_size)[0]
+            batch_images = d.get_batch_type(batch_size, 0)[0]
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 
