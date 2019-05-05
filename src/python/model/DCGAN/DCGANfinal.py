@@ -52,21 +52,21 @@ def generator(z,training, reuse=None):
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
 
-        hidden2=conv2d_transpose(hidden0, 5, 512, 2, 'same')
+        hidden2=conv2d_transpose(hidden0, 4, 512, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.5)
 
         hidden3 = conv2d_transpose(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
 
-        hidden4=conv2d_transpose(batch_norm3, 5, 128, 2, 'same')
+        hidden4=conv2d_transpose(batch_norm3, 4, 128, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
         #batch_norm4 = dropout(batch_norm4, 0.5)
 
-        hidden5=conv2d_transpose(batch_norm4, 5, 64, 1, 'same')
+        hidden5=conv2d_transpose(batch_norm4, 4, 64, 1, 'same')
         batch_norm5 = leaky_on_batch_norm(hidden5)
 
-        output= tf.nn.tanh(conv2d(batch_norm5, 5, channels, 1, 'same'))
+        output= tf.nn.tanh(conv2d_transpose(batch_norm5, 4, channels, 1, 'same'))
         return output
         """
 
@@ -94,10 +94,10 @@ def generator(z, training, reuse=None):
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1 = conv2d(X, 3, 512, 1, 'same')
+        hidden1 = conv2d(X, 3, 64, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
 
-        hidden2 = conv2d(hidden1, 4, 512, 2, 'same')
+        hidden2 = conv2d(hidden1, 4, 128, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
@@ -105,10 +105,10 @@ def discriminator(X, reuse=None):
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.4)
 
-        hidden4 = conv2d(batch_norm3, 4, 256, 1, 'same')
+        hidden4 = conv2d(batch_norm3, 4, 512, 1, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
 
-        logits = conv2d(batch_norm4, 4, 256, 2, 'same')
+        logits = conv2d(batch_norm4, 4, 1028, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
@@ -173,7 +173,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0002
+lr_d = 0.0004
 
 
 tvars = tf.trainable_variables()
@@ -255,7 +255,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_full_transpose_more_filters', gen_samples)
+np.save('gen_samples_bakalava_full_transpose_more_filters_scaling_high_lr', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
