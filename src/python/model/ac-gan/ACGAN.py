@@ -36,22 +36,22 @@ class ACGAN_Model:
 
     def model_init(self):
         self.real_images = tf.placeholder(tf.float32, shape=[self.batch_size, 64, 64, 3])
-        self.real_images += tf.random_normal(shape=tf.shape(self.real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32)
+        #self.real_images += tf.random_normal(shape=tf.shape(self.real_images), mean=0.0, stddev=random.uniform(0.0,0.1),dtype=tf.float32)
         self.z = tf.placeholder(tf.float32, shape=[None, 100])
         self.y1 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
         self.y2 = tf.placeholder(tf.float32, shape=[None, self.num_classes])
         g = self.generator(self.z, self.y1)
-        print(g)
+        #print(g)
         dreallog, _, drealclasses = self.discriminator(self.real_images)
         dfakelog, _, dfakeclasses = self.discriminator(g, reuse=True)
 
-        self.drealloss = self.loss_func(dreallog, tf.ones_like(dreallog)*random.uniform(0.9,1))
-        self.dfakeloss = self.loss_func(dfakelog, tf.zeros_like(dfakelog))
+        self.drealloss = self.loss_func(dreallog, tf.zeros_like(dreallog) + tf.random_normal(shape=tf.shape(dreallog), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+        self.dfakeloss = self.loss_func(dfakelog, tf.ones_like(dfakelog))
         self.drealclassloss = self.softmax_loss_func(drealclasses, self.y2)
         self.dfakeclassloss = self.softmax_loss_func(dfakeclasses, self.y1)
         self.dloss = (self.drealloss + self.dfakeloss)/4 + (self.drealclassloss + self.dfakeclassloss)/4
 
-        self.gloss = self.loss_func(dfakelog, tf.ones_like(dfakelog))/2 + self.dfakeclassloss/2
+        self.gloss = self.loss_func(dfakelog, tf.zeros_like(dfakelog))/2 + self.dfakeclassloss/2
 
         self.lrD = tf.placeholder(tf.float32, shape=[])
         self.lrG = tf.placeholder(tf.float32, shape=[])
@@ -72,9 +72,9 @@ class ACGAN_Model:
     def generator(self, inp, y, reuse=None):
         with tf.variable_scope('gen', reuse=reuse):
             bs = tf.shape(inp)[0]
-            hidden1_im = tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
-            hidden1_y = tf.layers.dense(inputs=y, units=2048, activation=tf.nn.leaky_relu)
-            hidden2_y = tf.layers.dense(inputs=hidden1_y, units=1024, activation=tf.nn.leaky_relu)
+            hidden1_im = tf.layers.dense(inputs=inp, units=64, activation=tf.nn.leaky_relu)
+            hidden1_y = tf.layers.dense(inputs=y, units=1024, activation=tf.nn.leaky_relu)
+            hidden2_y = tf.layers.dense(inputs=hidden1_y, units=512, activation=tf.nn.leaky_relu)
 
 
             concat = tf.concat([hidden1_im, hidden2_y], 1)
@@ -82,31 +82,30 @@ class ACGAN_Model:
             preconv = tf.reshape(concat_dense, [bs,4, 4, 1024])
 
 
-            #conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
-            #conv0b = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=512, strides=(1,1),padding='valid')
-            conv1 = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=1024, strides=(1,1),padding='valid')
-            conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same')
-            conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=256, strides=(2,2), padding='same')
-            output = tf.layers.conv2d_transpose(conv3, kernel_size=[5,5], filters=3,strides=(2,2), padding='same')
+            conv0a = tf.layers.conv2d_transpose(preconv, kernel_size=[5,5], filters=2048, strides=(1,1),padding='valid', activation=tf.nn.leaky_relu)
+            conv0b = tf.layers.conv2d_transpose(conv0a, kernel_size=[5,5], filters=2048, strides=(1,1),padding='valid', activation=tf.nn.leaky_relu)
+            conv1 = tf.layers.conv2d_transpose(conv0b, kernel_size=[5,5], filters=1024, strides=(2,2),padding='same', activation=tf.nn.leaky_relu)
+            conv2 = tf.layers.conv2d_transpose(conv1, kernel_size=[5,5], filters=512, strides=(2,2), padding='same', activation=tf.nn.leaky_relu)
+            #conv3 = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=128, strides=(2,2), padding='same')
+            output = tf.layers.conv2d_transpose(conv2, kernel_size=[5,5], filters=3,strides=(2,2), padding='same', activation='tanh')
             return output
 
     def discriminator(self, img, reuse=None):
         with tf.variable_scope('dis',reuse=reuse):
-            hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=1024, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+            hidden1_im = tf.layers.conv2d(img,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
             hidden1_pool = tf.layers.max_pooling2d(inputs=hidden1_im, pool_size=[2,2], strides=2)
-            hidden1_bn2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1_pool))
-            hidden2_im = tf.layers.conv2d(hidden1_bn2,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+            hidden2_im = tf.layers.conv2d(hidden1_pool, kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
             hidden2_pool = tf.layers.max_pooling2d(inputs=hidden2_im, pool_size=[2,2], strides=2)
-            hidden2_bn2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2_pool))
-            hidden3_im = tf.layers.conv2d(hidden2_pool,  kernel_size=[5,5], filters=512, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
+            hidden3_im = tf.layers.conv2d(hidden2_pool,  kernel_size=[5,5], filters=128, strides=(2,2), padding="SAME", activation=tf.nn.leaky_relu) #tf.layers.dense(inputs=inp, units=128, activation=tf.nn.leaky_relu)
             hidden3_pool = tf.layers.max_pooling2d(inputs=hidden3_im, pool_size=[2,2], strides=2)
-            hidden3_pool = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3_pool))
             hidden3_pool = tf.layers.flatten(hidden3_pool)
-            output_im = tf.layers.dense(inputs=hidden3_pool, units=256, activation=tf.nn.leaky_relu)
-            dense_0 = tf.layers.dense(inputs=output_im, units=256, activation=tf.nn.leaky_relu)
-
+            output_im = tf.layers.dense(inputs=hidden3_pool, units=128, activation=tf.nn.leaky_relu)
+            dense_0 = tf.layers.dense(inputs=output_im, units=128, activation=tf.nn.leaky_relu)
+            dense_0 = tf.layers.dropout(inputs= dense_0)
             dense_1f = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
+            dense_1f = tf.layers.dropout(inputs= dense_1f)
             dense_1c = tf.layers.dense(inputs=dense_0, units=128, activation=tf.nn.leaky_relu)
+            dense_1c = tf.layers.dropout(inputs= dense_1c)
             logits = tf.layers.dense(dense_1f, units=1)
             output = tf.sigmoid(logits)
 
