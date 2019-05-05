@@ -190,6 +190,7 @@ with tf.Session() as sess:
         D_losses = []
         G_losses = []
         for i in range(num_batches):
+            print(train_set.shape)
             print(i)
             train_g = True
             train_d = True
