@@ -36,4 +36,4 @@ x_train = (x_train-127.5) / 127.5
 
 print(x_train.shape)
 model = ACGAN_Model(x_train, y_train, np.array([]), np.array([]), num_classes=101, batch_size=32)
-model.train("testdropout", epochs=250, lrg=0.001, lrd=0.0001)
+model.train("testdropout", epochs=250, lrg=0.001, lrd=0.00001)
