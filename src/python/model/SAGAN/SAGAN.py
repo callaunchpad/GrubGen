@@ -26,10 +26,10 @@ def generator(z, reuse=None):
         momentum = 0.99
         # is_training=True
         hidden0 = tf.layers.dense(z, 32 * 32 * 128)
-        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 128))
         hidden0 = tf.nn.leaky_relu(hidden0)
+        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 128))
 
-        hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=128, strides=2, padding='same')
+        hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[4, 4], filters=128, strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
 
         hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
@@ -40,11 +40,9 @@ def generator(z, reuse=None):
         batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, decay=momentum))
 
         # batch size, 32, 32, 128
-        print(batch_norm4.shape)
-        output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1),
-                                  padding='same', activation=tf.nn.tanh)
+        output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1), padding='same')
+        output = tf.nn.tanh(output)
         # batch size, 64, 64, 3
-        print(output.shape)
     return output
 
 def discriminator(X, reuse=None):
