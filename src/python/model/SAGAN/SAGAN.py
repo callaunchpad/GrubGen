@@ -158,7 +158,7 @@ with tf.Session() as sess:
             train_g = True
             train_d = True
 
-            batch_images = d.get_batch_type(batch_size, 0)[0]
+            batch_images = d.get_batch_type(batch_size, 61)[0]
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 
