@@ -34,7 +34,7 @@ def discriminator(img):
 def generator(inp, cond_vec):
         with tf.variable_scope('gen'):
             hidden1_im = tf.layers.dense(inputs=inp, units=64, activation=tf.nn.leaky_relu)
-            hidden1_y = tf.layers.dense(inputs=y, units=1024, activation=tf.nn.leaky_relu)
+            hidden1_y = tf.layers.dense(inputs=cond_vec, units=1024, activation=tf.nn.leaky_relu)
             hidden2_y = tf.layers.dense(inputs=hidden1_y, units=512, activation=tf.nn.leaky_relu)
 
 
