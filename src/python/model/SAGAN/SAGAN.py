@@ -127,8 +127,8 @@ tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'dis' in var.name]
 g_vars = [var for var in tvars if 'gen' in var.name]
 
-D_trainer = tf.train.AdamOptimizer(lr).minimize(D_loss, var_list=d_vars)
-G_trainer = tf.train.AdamOptimizer(lr).minimize(G_loss, var_list=g_vars)
+D_trainer = tf.train.AdamOptimizer(lr_d).minimize(D_loss, var_list=d_vars)
+G_trainer = tf.train.AdamOptimizer(lr_g).minimize(G_loss, var_list=g_vars)
 
 init = tf.global_variables_initializer()
 
