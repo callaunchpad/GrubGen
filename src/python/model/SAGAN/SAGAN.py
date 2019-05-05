@@ -189,7 +189,7 @@ with tf.Session() as sess:
         epoch_start_time = time.time()
         D_losses = []
         G_losses = []
-        for i in range(train_set.shape[0] // batch_size):
+        for i in range(num_batches):
             train_g = True
             train_d = True
             train_set = train_set[i*batch_size:(i+1)*batch_size]
