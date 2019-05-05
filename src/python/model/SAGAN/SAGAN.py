@@ -65,7 +65,7 @@ def discriminator(X, reuse=None):
         logits = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
         logits = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(logits))
 
-        logits = tf.layers_flatten(logits)
+        logits = tf.contrib.layers.flatten(logits)
         logits = tf.nn.dropout(logits, 0.4)
         logits = tf.layers.dense(logits, 1)
         # batch size, ?, ?, 1
