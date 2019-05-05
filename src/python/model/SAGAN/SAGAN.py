@@ -42,8 +42,9 @@ def generator(z, reuse=None):
         # batch size, 32, 32, 128
         output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1), padding='same')
         output = tf.nn.tanh(output)
+
         # batch size, 64, 64, 3
-    return output
+        return output
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis', reuse=reuse):
@@ -62,9 +63,14 @@ def discriminator(X, reuse=None):
         # batch size, 8, 8, 512
 
         logits = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
+        logits = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(logits))
+
+        logits = tf.layers_flatten(logits)
+        logits = tf.nn.dropout(logits, 0.4)
+        logits = tf.layers.dense(logits, 1)
         # batch size, ?, ?, 1
         output = tf.sigmoid(logits)
-    return output, logits
+        return output, logits
 
 
 def attention(x, channels):
