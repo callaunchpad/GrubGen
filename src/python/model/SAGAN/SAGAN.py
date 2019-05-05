@@ -120,7 +120,7 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_d = 0.0001
+lr_d = 0.0005
 lr_g = 0.001
 
 tvars = tf.trainable_variables()
@@ -173,8 +173,9 @@ with tf.Session() as sess:
                 _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z})
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
-        print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % (
-            (epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % (
+        (epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
+        sys.stdout.flush()
         train_hist['D_losses'].append(np.mean(D_losses))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
