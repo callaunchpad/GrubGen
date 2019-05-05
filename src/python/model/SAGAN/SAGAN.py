@@ -18,6 +18,34 @@ channels = 3
 
 
 # dim of z is [batch, 1, 1, 100]
+def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, sn=False, scope='conv_0'):
+    with tf.variable_scope(scope):
+        if pad_type == 'zero' :
+            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
+        if pad_type == 'reflect' :
+            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]], mode='REFLECT')
+
+        if sn:
+            w = tf.get_variable("kernel", shape=[kernel, kernel, x.get_shape()[-1], channels], initializer=weight_init,
+                                regularizer=weight_regularizer)
+            x = tf.nn.conv2d(input=x, filter=spectral_norm(w),
+                             strides=[1, stride, stride, 1], padding='VALID')
+            if use_bias :
+                bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
+                x = tf.nn.bias_add(x, bias)
+
+        else :
+            x = tf.layers.conv2d(inputs=x, filters=channels,
+                                 kernel_size=kernel, kernel_initializer=weight_init,
+                                 kernel_regularizer=weight_regularizer,
+                                 strides=stride, use_bias=use_bias)
+
+
+        return x
+
+weight_init = tf.random_normal_initializer(mean=0.0, stddev=0.02)
+weight_regularizer = None
+
 def generator(z, reuse=None):
     with tf.variable_scope('gen', reuse=reuse):
         """ This is the generator model that is specifically designed to ouput 64x64 size images with the desired channels. """
@@ -29,15 +57,24 @@ def generator(z, reuse=None):
         hidden0 = tf.nn.leaky_relu(hidden0)
         hidden0 = tf.reshape(hidden0, (-1, 32, 32, 128))
 
-        hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[4, 4], filters=128, strides=2, padding='same')
+        w2 = tf.get_variable("kernel", shape=[4, 4, 100, 128], initializer=weight_init,
+                        regularizer=weight_regularizer)
+
+        hidden2 = tf.nn.conv2d_transpose(hidden0, filter=spectral_norm(w2), strides = 2, padding='same')
+        # hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[4, 4], filters=128, strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
 
-        hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
-        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
+        w3 = tf.get_variable("kernel", shape=[4, 4, 100, 128], initializer=weight_init,
+                            regularizer=weight_regularizer)
+
+        hidden3 = tf.nn.conv2d_transpose(hidden2, filter=spectral_norm(w3), strides=1, padding='same')
+
+        # hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides = 1, padding='same')
+        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
         batch_norm3_attention = attention(batch_norm3, 128)
 
         hidden4 = tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
-        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, decay=momentum))
+        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4))
 
         # batch size, 32, 32, 128
         output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1), padding='same')
@@ -93,6 +130,35 @@ def attention(x, channels):
         x = gamma * o + x
     return x
 
+def spectral_norm(w, iteration=1):
+    w_shape = w.shape.as_list()
+    w = tf.reshape(w, [-1, w_shape[-1]])
+
+    u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
+
+    u_hat = u
+    v_hat = None
+    for i in range(iteration):
+        """
+        power iteration
+        Usually iteration = 1 will be enough
+        """
+        v_ = tf.matmul(u_hat, tf.transpose(w))
+        v_hat = l2_norm(v_)
+
+        u_ = tf.matmul(v_hat, w)
+        u_hat = l2_norm(u_)
+
+    sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
+    w_norm = w / sigma
+
+    with tf.control_dependencies([u.assign(u_hat)]):
+        w_norm = tf.reshape(w_norm, w_shape)
+
+    return w_norm
+
+def l2_norm(v, eps=1e-12):
+    return v / (tf.reduce_sum(v ** 2) ** 0.5 + eps)
 
 tf.reset_default_graph()
 
