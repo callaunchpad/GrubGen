@@ -29,9 +29,11 @@ def add_multiple_classes(classes):
             y_train = np.vstack((y_train, y_train1))
     return shuffle(x_train, y_train, random_state=0)
 
-
 dl = DataLoader("cat")
 
 x_train, y_train = add_multiple_classes([1])
-model = ACGAN_Model(x_train, y_train, np.array([]), np.array([]), num_classes=101, batch_size=50)
-model.train("GrubGen3lrg0.0001lrd0.0001", epochs=100, lrg=0.0001, lrd=0.0001)
+x_train = (x_train-127.5) / 127.5
+
+print(x_train.shape)
+model = ACGAN_Model(x_train, y_train, np.array([]), np.array([]), num_classes=101, batch_size=32)
+model.train("testdropout", epochs=250, lrg=0.001, lrd=0.0001)
