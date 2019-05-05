@@ -19,8 +19,7 @@ channels = 1
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
-train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
-train_set = (train_set - 0.5) / 0.5  # normalization; range: -1 ~ 1
+
 
 
 # dim of z is [batch, 1, 1, 100]
@@ -184,8 +183,8 @@ d = DataLoader(mode="cat")
 
 with tf.Session() as sess:
     sess.run(init)
-    # train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
-    # train_set = (train_set - 0.5) * 2
+    train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
+    train_set = (train_set - 0.5) * 2
     for epoch in range(epochs):
         epoch_start_time = time.time()
         D_losses = []
