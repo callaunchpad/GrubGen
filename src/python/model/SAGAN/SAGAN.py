@@ -197,10 +197,10 @@ with tf.Session() as sess:
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 
-            loss_d_ = sess.run([D_loss], {real_images: batch_images, z: batch_z})
+            loss_d_ = sess.run([D_loss], {real_images: train_set, z: batch_z})
             D_losses.append(loss_d_)
             z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
-            loss_g_ = sess.run([G_loss], {z: batch_z, real_images: batch_images})
+            loss_g_ = sess.run([G_loss], {z: batch_z, real_images: train_set})
             G_losses.append(loss_g_)
             if loss_d_ > loss_g_ * 2:
                 train_g = False
