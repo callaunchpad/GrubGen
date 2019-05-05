@@ -54,14 +54,14 @@ def generator(z,training, reuse=None):
 
         hidden2=conv2d(hidden0, 5, 512, 1, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
-        batch_norm2 = dropout(batch_norm2, 0.5)
+        #batch_norm2 = dropout(batch_norm2, 0.5)
 
         hidden3 = conv2d_transpose(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
 
         hidden4=conv2d(batch_norm3, 5, 256, 1, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
-        batch_norm4 = dropout(batch_norm4, 0.5)
+        #batch_norm4 = dropout(batch_norm4, 0.5)
 
         hidden5=conv2d(batch_norm4, 5, 256, 1, 'same')
         batch_norm5 = leaky_on_batch_norm(hidden5)
@@ -216,7 +216,6 @@ with tf.Session() as sess:
         D_losses_real=[]
         D_losses_fake=[]
         G_losses=[]
-        print('starting epoch %d ...' % (epoch + 1))
         for i in range(rl_images.shape[0]//batch_size):
             train_g=True
             train_d=True
