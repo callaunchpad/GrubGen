@@ -114,7 +114,7 @@ for i in range(10000):
     lg = class_fake_loss + gen_fake_loss
     ld = class_real_loss + disc_real_loss + disc_fake_loss
     
-    print("Iter", i, class_real_loss, class_fake_loss, disc_real_loss, disc_fake_loss, gen_fake_loss)
+    print("Iter", i, crl, cfl, drl, dfl, gfl)
 
     disc_loss_lst.append(lg)
     gen_loss_lst.append(ld)
