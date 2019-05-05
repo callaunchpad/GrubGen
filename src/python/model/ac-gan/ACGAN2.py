@@ -71,7 +71,7 @@ real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, 3])
 labels = tf.placeholder(tf.float32, shape=[None, num_classes])
 z = tf.random_uniform((batch_size, batch_size)) * 2 - 1
 
-G_sample = generator(z)
+G_sample = generator(z, labels)
 with tf.variable_scope("") as scope:
     logits_real, class_real = discriminator(real_images)
     scope.reuse_variables() # Re-use discriminator weights on new inputs
