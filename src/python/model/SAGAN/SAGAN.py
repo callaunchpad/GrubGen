@@ -98,32 +98,32 @@ def attention(x, channels):
         x = gamma * o + x
     return x
 
-def spectral_norm(w, iteration=1):
-    w_shape = w.shape.as_list()
-    w = tf.reshape(w, [-1, w_shape[-1]])
-
-    u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
-
-    u_hat = u
-    v_hat = None
-    for i in range(iteration):
-        """
-        power iteration
-        Usually iteration = 1 will be enough
-        """
-        v_ = tf.matmul(u_hat, tf.transpose(w))
-        v_hat = l2_norm(v_)
-
-        u_ = tf.matmul(v_hat, w)
-        u_hat = l2_norm(u_)
-
-    sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
-    w_norm = w / sigma
-
-    with tf.control_dependencies([u.assign(u_hat)]):
-        w_norm = tf.reshape(w_norm, w_shape)
-
-    return w_norm
+# def spectral_norm(w, iteration=1):
+#     w_shape = w.shape.as_list()
+#     w = tf.reshape(w, [-1, w_shape[-1]])
+#
+#     u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.truncated_normal_initializer(), trainable=False)
+#
+#     u_hat = u
+#     v_hat = None
+#     for i in range(iteration):
+#         """
+#         power iteration
+#         Usually iteration = 1 will be enough
+#         """
+#         v_ = tf.matmul(u_hat, tf.transpose(w))
+#         v_hat = l2_norm(v_)
+#
+#         u_ = tf.matmul(v_hat, w)
+#         u_hat = l2_norm(u_)
+#
+#     sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
+#     w_norm = w / sigma
+#
+#     with tf.control_dependencies([u.assign(u_hat)]):
+#         w_norm = tf.reshape(w_norm, w_shape)
+#
+#     return w_norm
 
 def l2_norm(v, eps=1e-12):
     return v / (tf.reduce_sum(v ** 2) ** 0.5 + eps)
@@ -131,7 +131,7 @@ def l2_norm(v, eps=1e-12):
 
 tf.reset_default_graph()
 
-num_batches = 30
+num_batches = 10
 batch_size = 50
 epochs = 15
 
@@ -190,6 +190,7 @@ with tf.Session() as sess:
         D_losses = []
         G_losses = []
         for i in range(num_batches):
+            print(i)
             train_g = True
             train_d = True
             train_set = train_set[i*batch_size:(i+1)*batch_size]
