@@ -101,11 +101,11 @@ def discriminator(X, reuse=None):
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
-        hidden3 = conv2d(batch_norm2, 4, 256, 1, 'same')
+        hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.4)
 
-        hidden4 = conv2d(batch_norm3, 4, 512, 1, 'same')
+        hidden4 = conv2d(batch_norm3, 4, 512, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
 
         logits = conv2d(batch_norm4, 4, 1028, 2, 'same')
