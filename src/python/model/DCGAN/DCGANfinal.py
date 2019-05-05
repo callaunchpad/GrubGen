@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 20
-epochs= 25
+epochs= 100
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -94,10 +94,10 @@ def generator(z, training, reuse=None):
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1 = conv2d(X, 3, 256, 1, 'same')
+        hidden1 = conv2d(X, 3, 512, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
 
-        hidden2 = conv2d(hidden1, 4, 256, 2, 'same')
+        hidden2 = conv2d(hidden1, 4, 512, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
@@ -159,10 +159,10 @@ noise_prop = 0.05
 # flipped_idx = np.random.choice(np.arange(len(gene_labels)), size=int(noise_prop*len(gene_labels)))
 # gene_labels[flipped_idx] = 1 - gene_labels[flipped_idx]
 
-noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
+#noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
 G=generator(z, training)
-D_output_real,D_logits_real=discriminator(noisy_input_real)
+D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 
@@ -173,7 +173,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0003
+lr_d = 0.0002
 
 
 tvars = tf.trainable_variables()
@@ -255,7 +255,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_full_transpose_noisy_input', gen_samples)
+np.save('gen_samples_bakalava_full_transpose_noisy_input_low_lr', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
