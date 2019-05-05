@@ -5,7 +5,7 @@ import numpy as np
 #from tensorflow.examples.tutorials.mnist import input_data
 import sys
 sys.path.insert(0, '../../dataloader')
-#from dataloader import get_batch, load_files
+from dataloader import DataLoader
 from PIL import Image
 
 batch_size = 20
@@ -99,11 +99,11 @@ def discriminator(X, reuse=None):
 
         hidden2 = conv2d(hidden1, 4, 128, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
-        #batch_norm2 = dropout(batch_norm2, 0.4)
+        batch_norm2 = dropout(batch_norm2, 0.4)
 
         hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
-        #batch_norm3 = dropout(batch_norm3, 0.4)
+        batch_norm3 = dropout(batch_norm3, 0.4)
 
         hidden4 = conv2d(batch_norm3, 4, 512, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
@@ -206,6 +206,8 @@ train_hist['total_ptime'] = []
 rl_images = np.load("baklava.npy")
 rl_images = (rl_images - 127.5) / 127.5
 
+d = DataLoader(mode='cat')
+
 #print(x_train.shape)
 
 
@@ -223,7 +225,10 @@ with tf.Session() as sess:
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            batch_images = rl_images[i*batch_size:(i+1)*batch_size]
+            batch_images =d.get_batch_type(batch_size, 0)[0]
+            batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
+            batch_images = (batch_images - 127.5) / 127.5
+            #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
     
@@ -236,10 +241,10 @@ with tf.Session() as sess:
              #   train_g = False
             #if loss_g_ > loss_d_ * 2:
              #   train_d = False
-            if train_d:
-                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-            if train_g:
-                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
+            # if train_d:
+            #     _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
+            # if train_g:
+            #     _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
