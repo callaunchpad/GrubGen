@@ -124,7 +124,7 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_d = 0.00085
+lr_d = 0.004
 lr_g = 0.001
 
 tvars = tf.trainable_variables()
