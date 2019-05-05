@@ -94,6 +94,7 @@ G_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'gen')
 init= tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
+print("finished init")
 
 disc_loss_lst = []
 gen_loss_lst = []
