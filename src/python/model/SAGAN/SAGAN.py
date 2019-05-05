@@ -25,8 +25,8 @@ def generator(z, reuse=None):
         keep_prob = 0.6
         momentum = 0.99
         # is_training=True
-        hidden0 = tf.layers.dense(z, 16 * 16 * 512)
-        hidden0 = tf.reshape(hidden0, (-1, 16, 16, 512))
+        hidden0 = tf.layers.dense(z, 32 * 32 * 512)
+        hidden0 = tf.reshape(hidden0, (-1, 32, 32, 512))
         hidden0 = tf.nn.leaky_relu(hidden0)
 
         hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[5, 5], filters=256, strides=2, padding='same')
@@ -93,7 +93,7 @@ def attention(x, channels):
 tf.reset_default_graph()
 
 num_batches = 30
-batch_size = 10
+batch_size = 20
 epochs = 15
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, channels], name='real_images')
@@ -120,7 +120,8 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr = 0.004
+lr_d = 0.0001
+lr_g = 0.001
 
 tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'dis' in var.name]
