@@ -39,9 +39,9 @@ def generator(z, reuse=None):
 
         hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
         batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
-        batch_norm3_attention = attention(batch_norm3, 128)
+        # batch_norm3_attention = attention(batch_norm3, 128)
 
-        hidden4 = tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
+        hidden4 = tf.layers.conv2d(inputs=batch_norm3, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
         batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, decay=momentum))
 
         # batch size, 32, 32, 128
@@ -61,9 +61,9 @@ def discriminator(X, reuse=None):
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2))
         # batch size, 16, 16, 256
 
-        batch_norm2_attention = attention(batch_norm2, 512)
+        # batch_norm2_attention = attention(batch_norm2, 512)
 
-        hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=512, strides=2, padding='same')
+        hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=4, filters=512, strides=2, padding='same')
         batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
         # batch size, 8, 8, 512
 
@@ -132,7 +132,7 @@ def l2_norm(v, eps=1e-12):
 tf.reset_default_graph()
 
 num_batches = 30
-batch_size = 100
+batch_size = 50
 epochs = 15
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, channels], name='real_images')
