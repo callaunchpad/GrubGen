@@ -28,7 +28,7 @@ def discriminator(img):
         dense_1c = tf.layers.dropout(inputs= dense_1c)
         logits = tf.layers.dense(dense_1f, units=1)
 
-        classes_logits = tf.layers.dense(dense_1c, units=self.num_classes)
+        classes_logits = tf.layers.dense(dense_1c, units=num_classes)
         return logits, classes_logits 
 
 def generator(inp, cond_vec):
