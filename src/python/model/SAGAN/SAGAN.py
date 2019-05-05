@@ -14,38 +14,16 @@ sys.path.insert(0, "../../dataloader")
 from dataloader import DataLoader
 from PIL import Image
 
-channels = 3
+channels = 1
+
+
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
+
+train_set = tf.image.resize_images(mnist.train.images, [64, 64]).eval()
+train_set = (train_set - 0.5) / 0.5  # normalization; range: -1 ~ 1
 
 
 # dim of z is [batch, 1, 1, 100]
-def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, sn=False, scope='conv_0'):
-    with tf.variable_scope(scope):
-        if pad_type == 'zero' :
-            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
-        if pad_type == 'reflect' :
-            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]], mode='REFLECT')
-
-        if sn:
-            w = tf.get_variable("kernel", shape=[kernel, kernel, x.get_shape()[-1], channels], initializer=weight_init,
-                                regularizer=weight_regularizer)
-            x = tf.nn.conv2d(input=x, filter=spectral_norm(w),
-                             strides=[1, stride, stride, 1], padding='VALID')
-            if use_bias :
-                bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
-                x = tf.nn.bias_add(x, bias)
-
-        else :
-            x = tf.layers.conv2d(inputs=x, filters=channels,
-                                 kernel_size=kernel, kernel_initializer=weight_init,
-                                 kernel_regularizer=weight_regularizer,
-                                 strides=stride, use_bias=use_bias)
-
-
-        return x
-
-weight_init = tf.random_normal_initializer(mean=0.0, stddev=0.02)
-weight_regularizer = None
-
 def generator(z, reuse=None):
     with tf.variable_scope('gen', reuse=reuse):
         """ This is the generator model that is specifically designed to ouput 64x64 size images with the desired channels. """
@@ -57,24 +35,15 @@ def generator(z, reuse=None):
         hidden0 = tf.nn.leaky_relu(hidden0)
         hidden0 = tf.reshape(hidden0, (-1, 32, 32, 128))
 
-        w2 = tf.get_variable("kernel", shape=[4, 4, 100, 128], initializer=weight_init,
-                        regularizer=weight_regularizer)
-
-        hidden2 = tf.nn.conv2d_transpose(hidden0, filter=spectral_norm(w2), strides = 2, padding='same')
-        # hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[4, 4], filters=128, strides=2, padding='same')
+        hidden2 = tf.layers.conv2d_transpose(inputs=hidden0, kernel_size=[4, 4], filters=128, strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, is_training=True))
 
-        w3 = tf.get_variable("kernel", shape=[4, 4, 100, 128], initializer=weight_init,
-                            regularizer=weight_regularizer)
-
-        hidden3 = tf.nn.conv2d_transpose(hidden2, filter=spectral_norm(w3), strides=1, padding='same')
-
-        # hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides = 1, padding='same')
-        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
+        hidden3 = tf.layers.conv2d(inputs=batch_norm2, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
+        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
         batch_norm3_attention = attention(batch_norm3, 128)
 
         hidden4 = tf.layers.conv2d(inputs=batch_norm3_attention, kernel_size=[4, 4], filters=128, strides=(1, 1), padding='same')
-        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4))
+        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4, decay=momentum))
 
         # batch size, 32, 32, 128
         output = tf.layers.conv2d(inputs=batch_norm4, kernel_size=[4, 4], filters=channels, strides=(1, 1), padding='same')
@@ -160,6 +129,7 @@ def spectral_norm(w, iteration=1):
 def l2_norm(v, eps=1e-12):
     return v / (tf.reduce_sum(v ** 2) ** 0.5 + eps)
 
+
 tf.reset_default_graph()
 
 num_batches = 30
@@ -238,9 +208,9 @@ with tf.Session() as sess:
             if loss_g_ > loss_d_ * 2:
                 train_d = False
             if train_d:
-                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z})
+                _ = sess.run([D_trainer], {real_images: train_set, z: batch_z})
             if train_g:
-                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z})
+                _ = sess.run([G_trainer], {real_images: train_set, z: batch_z})
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
         sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % (
