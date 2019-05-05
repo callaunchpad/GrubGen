@@ -11,7 +11,7 @@ sys.path.insert(0, "../../dataloader")
 from dataloader import DataLoader
 
 batch_size = 128
-num_classes = 100
+num_classes = 101
 
 def discriminator(img):
     with tf.variable_scope('disc'):
