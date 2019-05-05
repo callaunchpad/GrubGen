@@ -49,16 +49,16 @@ def generator(z, reuse=None):
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis', reuse=reuse):
 
-        hidden1 = tf.layers.conv2d(inputs=X, kernel_size=4, filters=256, strides=2, padding='same')
+        hidden1 = tf.layers.conv2d(inputs=X, kernel_size=4, filters=512, strides=2, padding='same')
         batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1))
         # batch size, 32, 32, 128
-        hidden2 = tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=256, strides=2, padding='same')
+        hidden2 = tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=512, strides=2, padding='same')
         batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2))
         # batch size, 16, 16, 256
 
-        batch_norm2_attention = attention(batch_norm2, 256)
+        batch_norm2_attention = attention(batch_norm2, 512)
 
-        hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=256, strides=2, padding='same')
+        hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=512, strides=2, padding='same')
         batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
         # batch size, 8, 8, 512
 
