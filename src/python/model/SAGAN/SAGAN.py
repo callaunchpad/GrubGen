@@ -49,18 +49,18 @@ def generator(z, reuse=None):
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis', reuse=reuse):
-        momentum = 0.99
+
         hidden1 = tf.layers.conv2d(inputs=X, kernel_size=4, filters=128, strides=2, padding='same')
-        batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, decay=momentum))
+        batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1))
         # batch size, 32, 32, 128
         hidden2 = tf.layers.conv2d(inputs=batch_norm1, kernel_size=4, filters=128, strides=2, padding='same')
-        batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2, decay=momentum))
+        batch_norm2 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden2))
         # batch size, 16, 16, 256
 
         batch_norm2_attention = attention(batch_norm2, 128)
 
         hidden3 = tf.layers.conv2d(inputs=batch_norm2_attention, kernel_size=4, filters=128, strides=2, padding='same')
-        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3, decay=momentum))
+        batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
         # batch size, 8, 8, 512
 
         logits = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
@@ -118,7 +118,7 @@ D_fake_loss = loss_func(D_logits_fake,
                                                                        dtype=tf.float32))
 D_loss = (D_real_loss + D_fake_loss)
 
-G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_d = 0.0001
 lr_g = 0.001
