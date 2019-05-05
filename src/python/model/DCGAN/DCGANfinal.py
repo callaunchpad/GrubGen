@@ -9,7 +9,7 @@ sys.path.insert(0, '../../dataloader')
 from PIL import Image
 
 batch_size = 20
-epochs= 60
+epochs= 25
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -101,7 +101,7 @@ def discriminator(X, reuse=None):
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
-        hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
+        hidden3 = conv2d(batch_norm2, 4, 256, 1, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.4)
 
@@ -252,7 +252,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_different_kernel', gen_samples)
+np.save('gen_samples_bakalava_different_kernel_init', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
