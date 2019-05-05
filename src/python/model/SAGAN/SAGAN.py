@@ -132,7 +132,7 @@ def l2_norm(v, eps=1e-12):
 tf.reset_default_graph()
 
 num_batches = 30
-batch_size = 20
+batch_size = 100
 epochs = 15
 
 real_images = tf.placeholder(tf.float32, shape=[batch_size, 64, 64, channels], name='real_images')
@@ -189,10 +189,10 @@ with tf.Session() as sess:
         epoch_start_time = time.time()
         D_losses = []
         G_losses = []
-        for i in range(num_batches):
+        for i in range(train_set.shape[0] // batch_size):
             train_g = True
             train_d = True
-
+            train_set = train_set[i*batch_size:(i+1)*batch_size]
             batch_images = d.get_batch_type(batch_size, 61)[0]
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
