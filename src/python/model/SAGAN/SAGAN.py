@@ -212,9 +212,9 @@ with tf.Session() as sess:
             if loss_g_ > loss_d_ * 2:
                 train_d = False
             if train_d:
-                _ = sess.run([D_trainer], {real_images: train_set, z: batch_z})
+                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z})
             if train_g:
-                _ = sess.run([G_trainer], {real_images: train_set, z: batch_z})
+                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z})
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
         sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % (
