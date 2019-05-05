@@ -105,7 +105,10 @@ def discriminator(X, reuse=None):
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.4)
 
-        logits = conv2d(batch_norm3, 4, 256, 2, 'same')
+        hidden4 = conv2d(batch_norm3, 4, 256, 1, 'same')
+        batch_norm4 = leaky_on_batch_norm(hidden4)
+
+        logits = conv2d(batch_norm4, 4, 256, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
@@ -170,7 +173,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0001
+lr_d = 0.0005
 
 
 tvars = tf.trainable_variables()
@@ -252,7 +255,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_different_kernel_init', gen_samples)
+np.save('gen_samples_bakalava_one_more_layer', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
