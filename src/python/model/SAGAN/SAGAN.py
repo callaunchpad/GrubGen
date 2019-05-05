@@ -67,10 +67,10 @@ def discriminator(X, reuse=None):
         batch_norm3 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden3))
         # batch size, 8, 8, 512
 
-        hidden4 = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=512, strides=2, padding='same')
-        batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4))
+        # hidden4 = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=512, strides=2, padding='same')
+        # batch_norm4 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden4))
 
-        logits = tf.layers.conv2d(inputs=batch_norm4, kernel_size=4, filters=1, strides=1, padding='valid')
+        logits = tf.layers.conv2d(inputs=batch_norm3, kernel_size=4, filters=1, strides=1, padding='valid')
         logits = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(logits))
 
         logits = tf.contrib.layers.flatten(logits)
