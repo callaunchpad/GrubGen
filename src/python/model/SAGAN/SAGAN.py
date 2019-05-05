@@ -194,24 +194,24 @@ with tf.Session() as sess:
             print(i)
             train_g = True
             train_d = True
-            train_set = train_set[i*batch_size:(i+1)*batch_size]
+            batch_images = train_set[i*batch_size:(i+1)*batch_size]
             # batch_images = d.get_batch_type(batch_size, 61)[0]
             # batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
 
-            loss_d_ = sess.run([D_loss], {real_images: train_set, z: batch_z})
+            loss_d_, _ = sess.run([D_loss, D_trainer], {real_images: batch_images, z: batch_z})
             D_losses.append(loss_d_)
             z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
-            loss_g_ = sess.run([G_loss], {z: batch_z, real_images: train_set})
+            loss_g_, _ = sess.run([G_loss, G_trainer], {z: batch_z, real_images: batch_images})
             G_losses.append(loss_g_)
-            if loss_d_ > loss_g_ * 2:
-                train_g = False
-            if loss_g_ > loss_d_ * 2:
-                train_d = False
-            if train_d:
-                _ = sess.run([D_trainer], {real_images: train_set, z: batch_z})
-            if train_g:
-                _ = sess.run([G_trainer], {real_images: train_set, z: batch_z})
+            # if loss_d_ > loss_g_ * 2:
+            #     train_g = False
+            # if loss_g_ > loss_d_ * 2:
+            #     train_d = False
+            # if train_d:
+            #     _ = sess.run([D_trainer], {real_images: train_set, z: batch_z})
+            # if train_g:
+            #     _ = sess.run([G_trainer], {real_images: train_set, z: batch_z})
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
         sys.stdout.write('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f \n' % (
