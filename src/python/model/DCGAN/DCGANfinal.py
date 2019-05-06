@@ -8,9 +8,9 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
-num_batches= 50
-batch_size = 20
-epochs= 100
+num_batches= 30
+batch_size = 35
+epochs= 300
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -43,7 +43,7 @@ def leaky_on_batch_norm(inputs, is_training=True):
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
 
-"""
+
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
@@ -91,8 +91,8 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
-
 """
+
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         hidden1 = conv2d(x, 3, 64, 1, 'same')
@@ -124,7 +124,7 @@ def discriminator(x, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        x = conv2d(x, 3, 256, 1, 'same')
+        x = conv2d(x, 3, 512, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d(x, 4, 256, 2, 'same')
@@ -141,7 +141,7 @@ def discriminator(x, reuse=None):
         logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(logits)
         return output, logits
-
+"""
 
 
 tf.reset_default_graph()
@@ -169,7 +169,7 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
 D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real)*tf.random_uniform(tf.shape(D_logits_real), 0.9, 1.0))
-D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake)*tf.random_uniform(tf.shape(D_logits_real), 0.9, 1.0))
+D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
@@ -253,7 +253,7 @@ with tf.Session() as sess:
             if train_d:
                 _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
             if epoch > 30 and loss_d_fake < 0.35:
-                while loss_g_ > 1.3:
+                while loss_g_ > 1.2:
                     loss_g_, _ = sess.run([G_loss, G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
             G_losses.append(loss_g_)
@@ -264,15 +264,16 @@ with tf.Session() as sess:
         sys.stdout.flush()
         train_hist['D_losses_real'].append(np.mean(D_losses_real))
         train_hist['G_losses'].append(np.mean(G_losses))
-        train_hist['per_epoch_ptimes'].append(per_epoch_ptime)    
-        sample_z=np.random.uniform(-1,1,size=(1, 100))
-        gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
-        gen_samples.append(gen_sample)
+        train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
+        if epoch % 5 == 0 or epoch < 20:    
+            sample_z=np.random.uniform(-1,1,size=(1, 100))
+            gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
+            gen_samples.append(gen_sample)
 
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles_more_discrim_loss_switch_while', gen_samples)
+np.save('gen_samples_waffles_more_discrim_loss_switch_while_our_gen', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
