@@ -174,8 +174,8 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-lr_g = 0.0006
-lr_d = 0.0006
+lr_g = 0.001
+lr_d = 0.0001
 
 
 tvars = tf.trainable_variables()
@@ -186,8 +186,10 @@ optimizer = tf.train.AdamOptimizer()
 
 D_trainer=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_vars)
-D_gradients = optimizer.compute_gradients(D_loss, d_vars)
-G_gradients = optimizer.compute_gradients(G_loss, g_vars)
+D_gradients = 1
+#optimizer.compute_gradients(D_loss, d_vars)
+G_gradients =1
+#optimizer.compute_gradients(G_loss, g_vars)
 
 
 init=tf.global_variables_initializer()
@@ -213,7 +215,7 @@ train_hist['total_ptime'] = []
 d = DataLoader(mode='cat')
 
 #print(x_train.shape)
-np.save('dataloader_test', d.get_batch_type(1, 31)[0])
+#np.save('dataloader_test', d.get_batch_type(1, 31)[0])
 
 with tf.Session() as sess:
     sess.run(init)
@@ -238,25 +240,27 @@ with tf.Session() as sess:
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
     
-            loss_d_real, loss_d_fake, gradient_d, _ = sess.run([D_real_loss, D_fake_loss, D_gradients, D_trainer], {real_images: batch_images, z: batch_z, training: True})
+            loss_d_real, loss_d_fake, _ = sess.run([D_real_loss, D_fake_loss, D_trainer], {real_images: batch_images, z: batch_z, training: True})
             D_losses_real.append(loss_d_real)
             D_losses_fake.append(loss_d_fake)
-            D_gradients.append(gradient_d)
-            loss_g_, gradient_g, _ = sess.run([G_loss, G_gradients, G_trainer], {z: batch_z, real_images: batch_images, training: True})
-            G_losses.append(loss_g_)
-            G_gradients.append(gradient_g)
+            loss_g_, _ = sess.run([G_loss, G_trainer], {z: batch_z, real_images: batch_images, training: True})
+            #G_losses.append(loss_g_)
+            #G_gradients.append(gradient_g)
             # if loss_d_ > loss_g_ * 2:
             #    train_g = False
             # if loss_g_ > loss_d_ * 2:
             #    train_d = False
-            # if train_d:
-            #    _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-            if train_g:
-                _ = sess.run([G_trainer], {real_images: batch_images, z: batch_z, training: True})
+            if train_d:
+                _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
+            if epoch > 30 && loss_d_real < 0.35:
+                while loss_g_ > 1.3:
+                    loss_g_, _ = sess.run([G_loss, G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
+            G_losses.append(loss_g_)
+
         epoch_end_time = time.time()
         per_epoch_ptime = epoch_end_time - epoch_start_time
-        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d_real: %.3f, loss_d_fake: %.3f, loss_g: %.3f, gradient_d: %.3f, gradient_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses_real), np.mean(D_losses_fake), np.mean(G_losses), np.mean(D_gradients), np.mean(G_gradients)))
+        sys.stdout.write('[%d/%d] - ptime: %.2f loss_d_real: %.3f, loss_d_fake: %.3f, loss_g: %.3f \n' % ((epoch + 1), epochs, per_epoch_ptime, np.mean(D_losses_real), np.mean(D_losses_fake), np.mean(G_losses)))
         sys.stdout.flush()
         train_hist['D_losses_real'].append(np.mean(D_losses_real))
         train_hist['G_losses'].append(np.mean(G_losses))
@@ -268,7 +272,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles_low_gen_lr_loss_switch', gen_samples)
+np.save('gen_samples_waffles_more_discrim_loss_switch_while', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
