@@ -8,9 +8,9 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
-num_batches=30
+num_batches= 50
 batch_size = 20
-epochs= 40
+epochs= 100
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -73,11 +73,11 @@ def generator(z,training, reuse=None):
 
 def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        x = tf.layers.dense(z, 128 * 32 * 32, activation=tf.nn.leaky_relu)
+        x = tf.layers.dense(z, 256 * 32 * 32, activation=tf.nn.leaky_relu)
         x = leaky_on_batch_norm(x)
-        x = tf.reshape(x, (-1, 32, 32, 128))
+        x = tf.reshape(x, (-1, 32, 32, 256))
 
-        x = conv2d(x, 5, 128, 1, 'same')
+        x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d_transpose(x, 4, 128, 2, 'same')
@@ -168,14 +168,14 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean = 0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.001
+lr_d = 0.0005
 
 
 tvars = tf.trainable_variables()
@@ -262,7 +262,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles', gen_samples)
+np.save('gen_samples_waffles2', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
