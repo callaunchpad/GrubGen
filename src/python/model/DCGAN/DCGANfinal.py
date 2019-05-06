@@ -168,8 +168,8 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
-D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real)*tf.random.uniform(0.9, 1.0, shape=tf.shape(D_logits_real)))
-D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake)*tf.random.uniform(0.9, 1.0, shape=tf.shape(D_logits_real)))
+D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real)*tf.random_uniform(tf.shape(D_logits_real), 0.9, 1.0))
+D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake)*tf.random_uniform(tf.shape(D_logits_real), 0.9, 1.0))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
@@ -262,7 +262,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles_low_gen_lr', gen_samples)
+np.save('gen_samples_waffles_low_gen_lr_loss_switch', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
