@@ -43,7 +43,7 @@ def leaky_on_batch_norm(inputs, is_training=True):
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
 
-
+"""
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
@@ -91,6 +91,7 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
+        """
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
@@ -165,15 +166,16 @@ G=generator(z, training)
 D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
+#tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_fake), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0004
+lr_d = 0.001
 
 
 tvars = tf.trainable_variables()
@@ -232,15 +234,15 @@ with tf.Session() as sess:
 
             batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
     
-            loss_d_real, loss_d_fake = sess.run([D_real_loss, D_fake_loss], {real_images: batch_images, z: batch_z, training: True})
+            loss_d_real, loss_d_fake, _ = sess.run([D_real_loss, D_fake_loss, D_trainer], {real_images: batch_images, z: batch_z, training: True})
             D_losses_real.append(loss_d_real)
             D_losses_fake.append(loss_d_fake)
             loss_g_, _ = sess.run([G_loss, G_trainer], {z: batch_z, real_images: batch_images, training: True})
             G_losses.append(loss_g_)
-            #if loss_d_ > loss_g_ * 2:
-             #   train_g = False
-            #if loss_g_ > loss_d_ * 2:
-             #   train_d = False
+            # if loss_d_ > loss_g_ * 2:
+            #    train_g = False
+            # if loss_g_ > loss_d_ * 2:
+            #    train_d = False
             # if train_d:
             #     _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
             # if train_g:
