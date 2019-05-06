@@ -252,7 +252,7 @@ with tf.Session() as sess:
             #    train_d = False
             if train_d:
                 _ = sess.run([D_trainer], {real_images: batch_images, z: batch_z, training: True})
-            if epoch > 30 && loss_d_real < 0.35:
+            if epoch > 30 and loss_d_fake < 0.35:
                 while loss_g_ > 1.3:
                     loss_g_, _ = sess.run([G_loss, G_trainer], {real_images: batch_images, z: batch_z, training: True})
             #print('finished training batch')
