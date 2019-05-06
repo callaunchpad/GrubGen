@@ -8,6 +8,7 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
+num_batches=30
 batch_size = 20
 epochs= 40
 
@@ -90,7 +91,6 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
-"""
 
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
@@ -99,11 +99,11 @@ def discriminator(X, reuse=None):
 
         hidden2 = conv2d(hidden1, 4, 128, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
-        batch_norm2 = dropout(batch_norm2, 0.4)
+        #batch_norm2 = dropout(batch_norm2, 0.4)
 
         hidden3 = conv2d(batch_norm2, 4, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
-        batch_norm3 = dropout(batch_norm3, 0.4)
+        #batch_norm3 = dropout(batch_norm3, 0.4)
 
         hidden4 = conv2d(batch_norm3, 4, 512, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
@@ -140,7 +140,7 @@ def discriminator(x, reuse=None):
         logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(logits)
         return output, logits
-"""
+
 
 
 tf.reset_default_graph()
@@ -203,13 +203,13 @@ train_hist['total_ptime'] = []
 
 #load_files()
 
-rl_images = np.load("baklava.npy")
-rl_images = (rl_images - 127.5) / 127.5
+#rl_images = np.load("baklava.npy")
+#rl_images = (rl_images - 127.5) / 127.5
 
 d = DataLoader(mode='cat')
 
 #print(x_train.shape)
-
+np.save('dataloader_test', d.get_batch_type(1, 31)[0])
 
 with tf.Session() as sess:
     sess.run(init)
@@ -221,7 +221,7 @@ with tf.Session() as sess:
         D_losses_real=[]
         D_losses_fake=[]
         G_losses=[]
-        for i in range(rl_images.shape[0]//batch_size):
+        for i in range(num_batches):
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
@@ -260,7 +260,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_bakalava_full_transpose_more_filters_scaling_high_lr', gen_samples)
+np.save('gen_samples_waffles', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
