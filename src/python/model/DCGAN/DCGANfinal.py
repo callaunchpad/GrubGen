@@ -43,7 +43,7 @@ def leaky_on_batch_norm(inputs, is_training=True):
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
 
-"""
+
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
@@ -91,8 +91,8 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
-        """
 
+"""
 def discriminator(X, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         hidden1 = conv2d(X, 3, 64, 1, 'same')
@@ -142,7 +142,7 @@ def discriminator(x, reuse=None):
         output = tf.sigmoid(logits)
         return output, logits
 
-
+"""
 
 tf.reset_default_graph()
 
@@ -175,7 +175,7 @@ D_loss = (D_real_loss + D_fake_loss)
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0005
+lr_d = 0.0003
 
 
 tvars = tf.trainable_variables()
@@ -262,7 +262,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles2', gen_samples)
+np.save('gen_samples_waffles_our_gen', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
