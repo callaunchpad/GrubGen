@@ -10,7 +10,7 @@ from PIL import Image
 
 num_batches= 50
 batch_size = 20
-epochs= 40
+epochs= 100
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -31,14 +31,14 @@ def loss_func(logits_in, labels_in):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits_in,labels=labels_in))
 
 def conv2d(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02), activation = tf.nn.leaky_relu)
+    return tf.layers.conv2d(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.contrib.layers.xavier_initializer())
 
 def conv2d_transpose(inputs, kernel, filters, strides, padding):
-    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02), activation=tf.nn.leaky_relu)
+    return tf.layers.conv2d_transpose(inputs, kernel_size=kernel, filters=filters, strides=strides, padding=padding, kernel_initializer=tf.contrib.layers.xavier_initializer())
 
 
 def leaky_on_batch_norm(inputs, is_training=True):
-    return tf.contrib.layers.batch_norm(inputs, is_training=is_training)
+    return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training))
 
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
@@ -73,17 +73,17 @@ def generator(z,training, reuse=None):
 
 def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        x = tf.layers.dense(z, 256 * 32 * 32, activation=tf.nn.leaky_relu)
+        x = tf.layers.dense(z, 256 * 32 * 32)
         x = leaky_on_batch_norm(x)
         x = tf.reshape(x, (-1, 32, 32, 256))
 
         x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d_transpose(x, 4, 128, 2, 'same')
+        x = conv2d_transpose(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 5, 128, 1, 'same')
+        x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d(x, 5, 128, 1, 'same')
@@ -93,9 +93,9 @@ def generator(z, training, reuse=None):
         return x
 
 """
-def discriminator(X, reuse=None):
+def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1 = conv2d(X, 3, 64, 1, 'same')
+        hidden1 = conv2d(x, 3, 64, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
 
         hidden2 = conv2d(hidden1, 4, 128, 2, 'same')
@@ -124,10 +124,10 @@ def discriminator(X, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        x = conv2d(x, 3, 128, 1, 'same')
+        x = conv2d(x, 3, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 128, 2, 'same')
+        x = conv2d(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d(x, 4, 256, 2, 'same')
@@ -160,10 +160,10 @@ noise_prop = 0.05
 # flipped_idx = np.random.choice(np.arange(len(gene_labels)), size=int(noise_prop*len(gene_labels)))
 # gene_labels[flipped_idx] = 1 - gene_labels[flipped_idx]
 
-noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
+#noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
 G=generator(z, training)
-D_output_real,D_logits_real=discriminator(noisy_input_real)
+D_output_real,D_logits_real=discriminator(real_images)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
@@ -174,8 +174,8 @@ D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.001
-lr_d = 0.0002
+lr_g = 0.0006
+lr_d = 0.0006
 
 
 tvars = tf.trainable_variables()
@@ -262,7 +262,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_waffles_leaky_first_theirs2', gen_samples)
+np.save('gen_samples_waffles_low_gen_lr', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
