@@ -8,9 +8,9 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
-num_batches= 50
+num_batches= 40
 batch_size = 20
-epochs= 50
+epochs= 100
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -275,10 +275,9 @@ with tf.Session() as sess:
         train_hist['D_losses_real'].append(np.mean(D_losses_real))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
-        if epoch % 5 == 0 or epoch < 50:    
-            sample_z=np.random.uniform(-1,1,size=(1, 100))
-            gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
-            gen_samples.append(gen_sample)
+        sample_z=np.random.uniform(-1,1,size=(1, 100))
+        gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
+        gen_samples.append(gen_sample)
 
 
 
