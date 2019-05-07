@@ -8,9 +8,9 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
-num_batches= 40
-batch_size = 20
-epochs= 100
+num_batches= 50
+batch_size = 30
+epochs= 120
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -42,32 +42,32 @@ def leaky_on_batch_norm(inputs, is_training=True):
 
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
-"""
+
 
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
         #This is the generator model that is sepcifically designed to ouput 64x64 size images with the desired channels.
-        hidden0= tf.layers.dense(z, 8*8*1024)
+        hidden0= tf.layers.dense(z, 4*4*1024)
         hidden0 = leaky_on_batch_norm(hidden0)
-        hidden0 = tf.reshape(hidden0, (-1, 8, 8, 1024))
+        hidden0 = tf.reshape(hidden0, (-1, 4, 4, 1024))
         #hidden1=tf.layers.conv2d_transpose(inputs=z, kernel_size=[4,4], filters=1028*2, strides=(1, 1), padding='valid')
         #batch_norm1 = tf.nn.leaky_relu(tf.contrib.layers.batch_norm(hidden1, is_training=training, decay=momentum))
 
-        hidden2=conv2d_transpose(hidden0, 4, 512, 2, 'same')
+        hidden2=conv2d_transpose(hidden0, 5, 512, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.5)
 
-        hidden3 = conv2d_transpose(batch_norm2, 4, 256, 2, 'same')
+        hidden3 = conv2d_transpose(batch_norm2, 5, 256, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
 
-        hidden4=conv2d_transpose(batch_norm3, 4, 128, 2, 'same')
+        hidden4=conv2d_transpose(batch_norm3, 5, 128, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
         #batch_norm4 = dropout(batch_norm4, 0.5)
 
-        hidden5=conv2d_transpose(batch_norm4, 4, 64, 1, 'same')
+        hidden5=conv2d_transpose(batch_norm4, 5, 64, 2, 'same')
         batch_norm5 = leaky_on_batch_norm(hidden5)
 
-        output= tf.nn.tanh(conv2d_transpose(batch_norm5, 4, channels, 1, 'same'))
+        output= tf.nn.tanh(conv2d_transpose(batch_norm5, 5, channels, 1, 'same'))
         return output
         """
 
@@ -91,30 +91,30 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
-
+"""
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        start_filters = 32
-        hidden1 = conv2d(x, 3, start_filters*2, 1, 'same')
-        #hidden1 = leaky_on_batch_norm(hidden1)
+        start_filters = 64
+        hidden1 = conv2d(x, 5, start_filters*2, 2, 'same')
+        hidden1 = leaky_on_batch_norm(hidden1)
 
-        hidden2 = conv2d(hidden1, 4, start_filters*4, 2, 'same')
+        hidden2 = conv2d(hidden1, 5, start_filters*4, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
-        hidden3 = conv2d(batch_norm2, 4, start_filters*8, 2, 'same')
+        hidden3 = conv2d(batch_norm2, 5, start_filters*8, 1, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.5)
 
-        hidden4 = conv2d(batch_norm3, 4, start_filters*16, 2, 'same')
+        hidden4 = conv2d(batch_norm3, 5, start_filters*16, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
 
-        logits = conv2d(batch_norm4, 4, start_filters*32, 2, 'same')
+        logits = conv2d(batch_norm4, 5, start_filters*16, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
-        logits = tf.nn.dropout(logits, 0.4)
+        #logits = tf.nn.dropout(logits, 0.4)
         logits = tf.layers.dense(logits, 1)
 
         output=tf.sigmoid(logits)
@@ -160,27 +160,26 @@ noise_prop = 0.05
 # flipped_idx = np.random.choice(np.arange(len(gene_labels)), size=int(noise_prop*len(gene_labels)))
 # gene_labels[flipped_idx] = 1 - gene_labels[flipped_idx]
 
-#noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
+noisy_input_real = real_images + tf.random_normal(shape=tf.shape(real_images), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
 G=generator(z, training)
-D_output_real,D_logits_real=discriminator(real_images)
+D_output_real,D_logits_real=discriminator(noisy_input_real)
 D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+D_real_loss=loss_func(D_logits_real, tf.ones_like(D_logits_real)*random.uniform(0.9, 1.0))
+D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake))
 
-D_real_loss2=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
-D_fake_loss2=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+#D_real_loss2=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
+#D_fake_loss2=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-D_loss = (D_real_loss + D_fake_loss)
-D_loss2 = D_real_loss2 + D_fake_loss2
+D_loss = tf.reduce_mean((D_real_loss + D_fake_loss)*0.5)
+#D_loss2 = D_real_loss2 + D_fake_loss2
+G_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
 
-G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
-
-lr_g = 0.001
-lr_d = 0.0002
+lr_g = 0.0004
+lr_d = 0.00004
 
 
 tvars = tf.trainable_variables()
@@ -192,7 +191,7 @@ optimizer = tf.train.AdamOptimizer()
 D_trainer=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_vars)
 
-D_trainer2=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss2,var_list=d_vars)
+#D_trainer2=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss2,var_list=d_vars)
 
 D_gradients = 1
 #optimizer.compute_gradients(D_loss, d_vars)
@@ -246,7 +245,7 @@ with tf.Session() as sess:
             batch_images = (batch_images - 127.5) / 127.5
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
 
-            batch_z=np.random.uniform(-1, 1, size=(batch_size, 100))
+            batch_z=np.random.normal(loc=0.0,scale=1.0, size=(batch_size, 100))
     
             loss_d_real, loss_d_fake, _ = sess.run([D_real_loss, D_fake_loss, D_trainer], {real_images: batch_images, z: batch_z, training: True})
             D_losses_real.append(loss_d_real)
@@ -275,14 +274,14 @@ with tf.Session() as sess:
         train_hist['D_losses_real'].append(np.mean(D_losses_real))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
-        sample_z=np.random.uniform(-1,1,size=(1, 100))
+        sample_z=np.random.normal(loc=0.0,scale=1.0,size=(1, 100))
         gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
         gen_samples.append(gen_sample.reshape(64, 64, 3))
 
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_pizza', gen_samples)
+np.save('gen_samples_pizza4', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
