@@ -4,6 +4,7 @@ import random
 import numpy as np
 # from tensorflow.examples.tutorials.mnist import input_data
 import sys
+from PIL import Image
 
 sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
@@ -100,9 +101,9 @@ def generator(z, training, reuse=None):
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         start_filters = 256
-        hidden1 = conv2d(x, 3, start_filters, 1, 'same')
+        hidden1 = conv2d(x, 3, start_filters*2, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
-        hidden2 = conv2d(hidden1, 4, start_filters, 2, 'same')
+        hidden2 = conv2d(hidden1, 4, start_filters*2, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
         hidden3 = conv2d(batch_norm2, 4, start_filters, 2, 'same')
@@ -204,7 +205,7 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0001
+lr_d = 0.0003
 
 tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'dis' in var.name]
@@ -299,7 +300,7 @@ with tf.Session() as sess:
         if epoch % 5 == 0 or epoch < 50:
             sample_z = np.random.uniform(-1, 1, size=(1, 100))
             gen_sample = sess.run(generator(z, training, reuse=True), feed_dict={z: sample_z, training: False})
-            gen_samples.append(gen_sample)
+            gen_samples.append(gen_sample[0])
 
 # reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
 np.save('gen_samples_choc_cake_their_gen', gen_samples)
