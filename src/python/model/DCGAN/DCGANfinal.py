@@ -42,7 +42,7 @@ def leaky_on_batch_norm(inputs, is_training=True):
 
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
-
+"""
 
 def generator(z,training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
@@ -86,7 +86,7 @@ def generator(z, training, reuse=None):
         x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 5, 128, 1, 'same')
+        x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
@@ -125,7 +125,7 @@ def discriminator(x, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        x = conv2d(x, 3, 512, 1, 'same')
+        x = conv2d(x, 3, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d(x, 4, 256, 2, 'same')
@@ -142,7 +142,7 @@ def discriminator(x, reuse=None):
         logits = tf.layers.dense(x, 1)
         output = tf.sigmoid(logits)
         return output, logits
-"""
+
 
 
 tf.reset_default_graph()
@@ -276,7 +276,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_choc_cake_our_gen', gen_samples)
+np.save('gen_samples_choc_cake_their_gen', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
