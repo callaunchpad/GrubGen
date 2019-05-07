@@ -91,26 +91,26 @@ def generator(z, training, reuse=None):
 
         x = tf.nn.tanh(conv2d(x, 5, 3, 1, 'same'))
         return x
-"""
+
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        start_filters = 64
+        start_filters = 256
         hidden1 = conv2d(x, 3, start_filters, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
 
-        hidden2 = conv2d(hidden1, 4, start_filters*2, 2, 'same')
+        hidden2 = conv2d(hidden1, 4, start_filters, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
-        hidden3 = conv2d(batch_norm2, 4, start_filters*4, 2, 'same')
+        hidden3 = conv2d(batch_norm2, 4, start_filters, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.5)
 
-        hidden4 = conv2d(batch_norm3, 4, start_filters*8, 2, 'same')
+        hidden4 = conv2d(batch_norm3, 4, start_filters, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
 
-        logits = conv2d(batch_norm4, 4, start_filters*16, 2, 'same')
+        logits = conv2d(batch_norm4, 4, start_filters, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
@@ -121,7 +121,6 @@ def discriminator(x, reuse=None):
         return output, logits
 
 """
-
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
@@ -143,7 +142,7 @@ def discriminator(x, reuse=None):
         output = tf.sigmoid(logits)
         return output, logits
 
-
+"""
 
 tf.reset_default_graph()
 
@@ -180,8 +179,8 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0004
-lr_d = 0.00004
+lr_g = 0.001
+lr_d = 0.0001
 
 
 tvars = tf.trainable_variables()
@@ -284,7 +283,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_choc_cake_their_gen', gen_samples)
+np.save('gen_samples_choc_cake', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
