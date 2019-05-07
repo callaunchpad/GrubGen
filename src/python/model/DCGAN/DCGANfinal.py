@@ -277,7 +277,7 @@ with tf.Session() as sess:
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
         sample_z=np.random.uniform(-1,1,size=(1, 100))
         gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
-        gen_samples.append(np.reshape(gen_sample, 64, 64, 3))
+        gen_samples.append(gen_sample.reshape(64, 64, 3))
 
 
 
