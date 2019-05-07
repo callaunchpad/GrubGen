@@ -108,8 +108,9 @@ for i in range(10000):
     _, crl, drl, dfl = sess.run([D_train_step, class_real_loss, disc_real_loss, disc_fake_loss], feed_dict={
         real_images: batch, labels: batch_oh})
 
-    _, cfl, gfl = sess.run([G_train_step, class_fake_loss, gen_fake_loss], feed_dict={
-        real_images: batch, labels: batch_oh})
+    for i in range(4):
+        _, cfl, gfl = sess.run([G_train_step, class_fake_loss, gen_fake_loss], feed_dict={
+            real_images: batch, labels: batch_oh})
 
     lg = class_fake_loss + gen_fake_loss
     ld = class_real_loss + disc_real_loss + disc_fake_loss
