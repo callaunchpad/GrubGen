@@ -201,7 +201,6 @@ with tf.Session() as sess:
             # batch_images = d.get_batch_type(batch_size, 61)[0]
             # batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_z = np.random.uniform(-1, 1, size=(batch_size, 1, 1, 100))
-
             loss_d_, _ = sess.run([D_loss, D_trainer], {real_images: batch_images, z: batch_z})
             D_losses.append(loss_d_)
             z_ = np.random.normal(0, 1, (batch_size, 1, 1, 100))
