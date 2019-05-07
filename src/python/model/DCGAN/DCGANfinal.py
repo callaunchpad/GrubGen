@@ -180,7 +180,7 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0001
+lr_d = 0.0003
 
 
 tvars = tf.trainable_variables()
@@ -277,7 +277,7 @@ with tf.Session() as sess:
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
         sample_z=np.random.uniform(-1,1,size=(1, 100))
         gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
-        gen_samples.append(gen_sample)
+        gen_samples.append(np.reshape(gen_sample, 64, 64, 3))
 
 
 
