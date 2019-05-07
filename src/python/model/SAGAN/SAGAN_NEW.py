@@ -97,7 +97,6 @@ def generator(z, training, reuse=None):
         return x
 
 
-"""
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
         start_filters = 64
@@ -118,31 +117,29 @@ def discriminator(x, reuse=None):
         logits = tf.layers.dense(logits, 1)
         output=tf.sigmoid(logits)
         return output, logits
-"""
 
-
-def discriminator(x, reuse=None):
-    with tf.variable_scope('dis', reuse=reuse):
-        x = conv2d(x, 3, 256, 1, 'same')
-        x = leaky_on_batch_norm(x)
-
-        x = conv2d(x, 4, 256, 2, 'same')
-        x = leaky_on_batch_norm(x)
-
-        # adding attention
-        # x = attention(x, 256)
-
-        x = conv2d(x, 4, 256, 2, 'same')
-        x = leaky_on_batch_norm(x)
-
-        x = conv2d(x, 4, 256, 2, 'same')
-        x = leaky_on_batch_norm(x)
-
-        x = tf.layers.flatten(x)
-        x = tf.nn.dropout(x, 0.4)
-        logits = tf.layers.dense(x, 1)
-        output = tf.sigmoid(logits)
-        return output, logits
+# def discriminator(x, reuse=None):
+#     with tf.variable_scope('dis', reuse=reuse):
+#         x = conv2d(x, 3, 256, 1, 'same')
+#         x = leaky_on_batch_norm(x)
+#
+#         x = conv2d(x, 4, 256, 2, 'same')
+#         x = leaky_on_batch_norm(x)
+#
+#         # adding attention
+#         # x = attention(x, 256)
+#
+#         x = conv2d(x, 4, 256, 2, 'same')
+#         x = leaky_on_batch_norm(x)
+#
+#         x = conv2d(x, 4, 256, 2, 'same')
+#         x = leaky_on_batch_norm(x)
+#
+#         x = tf.layers.flatten(x)
+#         x = tf.nn.dropout(x, 0.4)
+#         logits = tf.layers.dense(x, 1)
+#         output = tf.sigmoid(logits)
+#         return output, logits
 
 def attention(x, channels):
     with tf.variable_scope('attention', reuse=None):
@@ -206,8 +203,8 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0004
-lr_d = 0.00004
+lr_g = 0.001
+lr_d = 0.0002
 
 tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'dis' in var.name]
