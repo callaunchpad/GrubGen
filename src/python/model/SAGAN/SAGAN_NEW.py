@@ -261,7 +261,7 @@ with tf.Session() as sess:
             train_g = True
             train_d = True
             # batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            batch_images = d.get_batch_type(batch_size, 11)[0]
+            batch_images = d.get_batch_type(batch_size, 15)[0]
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_images = (batch_images - 127.5) / 127.5
             # batch_images = rl_images[i*batch_size:(i+1)*batch_size]
@@ -303,7 +303,7 @@ with tf.Session() as sess:
             gen_samples.append(gen_sample[0])
 
 # reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_choc_cake_their_gen', gen_samples)
+np.save('samosa', gen_samples)
 # img = Image.fromarray(reshaped_rgb, 'RGB')
 # img.show()
 # reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
