@@ -241,7 +241,7 @@ with tf.Session() as sess:
             train_g=True
             train_d=True
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
-            batch_images = d.get_batch_type(batch_size, 23)[0]
+            batch_images = d.get_batch_type(batch_size, 73)[0]
             batch_images = np.reshape(batch_images, [-1, 64, 64, 3])
             batch_images = (batch_images - 127.5) / 127.5
             #batch_images = rl_images[i*batch_size:(i+1)*batch_size]
