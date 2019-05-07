@@ -80,7 +80,7 @@ with tf.variable_scope("") as scope:
 # get our loss
 class_real_loss, class_fake_loss, gen_fake_loss, disc_real_loss, disc_fake_loss = gan_loss(logits_real, logits_fake, class_real, class_fake, labels)
 
-G_loss = class_fake_loss + gen_fake_loss
+G_loss = 3 * class_fake_loss + gen_fake_loss
 D_loss = class_real_loss + disc_real_loss + disc_fake_loss
 
 # setup training steps
