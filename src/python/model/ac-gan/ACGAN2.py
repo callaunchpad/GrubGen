@@ -86,8 +86,8 @@ D_loss = class_real_loss + disc_real_loss + disc_fake_loss
 # setup training steps
 D_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'disc')
 G_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'gen') 
-D_train_step = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(D_loss, var_list=D_vars)
-G_train_step = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(G_loss, var_list=G_vars)
+D_train_step = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(D_loss, var_list=D_vars)
+G_train_step = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(G_loss, var_list=G_vars)
 D_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'disc')
 G_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'gen')
 
