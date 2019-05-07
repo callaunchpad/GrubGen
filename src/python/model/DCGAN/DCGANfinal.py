@@ -38,7 +38,7 @@ def conv2d_transpose(inputs, kernel, filters, strides, padding):
 
 
 def leaky_on_batch_norm(inputs, is_training=True):
-    return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training), epsilon=0.00001)
+    return tf.nn.leaky_relu(tf.contrib.layers.batch_norm(inputs, is_training=is_training, epsilon=0.00001))
 
 def dropout(inputs, keep_prob):
     return tf.nn.dropout(inputs, keep_prob)
@@ -95,21 +95,22 @@ def generator(z, training, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        hidden1 = conv2d(x, 3, 32, 1, 'same')
+        start_filters = 64
+        hidden1 = conv2d(x, 3, start_filters, 1, 'same')
         #hidden1 = leaky_on_batch_norm(hidden1)
 
-        hidden2 = conv2d(hidden1, 4, 64, 2, 'same')
+        hidden2 = conv2d(hidden1, 4, start_filters*2, 2, 'same')
         batch_norm2 = leaky_on_batch_norm(hidden2)
         #batch_norm2 = dropout(batch_norm2, 0.4)
 
-        hidden3 = conv2d(batch_norm2, 4, 128, 2, 'same')
+        hidden3 = conv2d(batch_norm2, 4, start_filters*4, 2, 'same')
         batch_norm3 = leaky_on_batch_norm(hidden3)
         #batch_norm3 = dropout(batch_norm3, 0.5)
 
-        hidden4 = conv2d(batch_norm3, 4, 256, 2, 'same')
+        hidden4 = conv2d(batch_norm3, 4, start_filters*8, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
 
-        logits = conv2d(batch_norm4, 4, 512, 2, 'same')
+        logits = conv2d(batch_norm4, 4, start_filters*16, 2, 'same')
         logits = leaky_on_batch_norm(logits)
 
         logits = tf.layers.flatten(logits)
@@ -169,13 +170,13 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_uniform(tf.shape(D_logits_real), 0.0, 0.1))
-D_fake_loss=loss_func(-D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_uniform(tf.shape(D_logits_fake), 0.0, 0.1))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_uniform(tf.shape(D_logits_fake), 0.0, 0.1))
 D_loss = (D_real_loss + D_fake_loss)
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.0004
-lr_d = 0.00004
+lr_g = 0.001
+lr_d = 0.0003
 
 
 tvars = tf.trainable_variables()
