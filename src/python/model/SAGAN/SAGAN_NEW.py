@@ -111,7 +111,7 @@ def discriminator(x, reuse=None):
         #batch_norm3 = dropout(batch_norm3, 0.5)
         hidden4 = conv2d(batch_norm3, 4, start_filters, 2, 'same')
         batch_norm4 = leaky_on_batch_norm(hidden4)
-        logits = conv2d(batch_norm4, 4, start_filters, 2, 'same')
+        logits = conv2d(batch_norm4, 4, start_filters * 2, 2, 'same')
         logits = leaky_on_batch_norm(logits)
         logits = tf.layers.flatten(logits)
         logits = tf.nn.dropout(logits, 0.4)
@@ -205,7 +205,7 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0002
+lr_d = 0.0003
 
 tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'dis' in var.name]
