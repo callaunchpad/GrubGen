@@ -171,7 +171,12 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_uniform(tf.shape(D_logits_real), 0.0, 0.1))
 D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_uniform(tf.shape(D_logits_fake), 0.0, 0.1))
+
+D_real_loss2=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
+D_fake_loss2=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
+
 D_loss = (D_real_loss + D_fake_loss)
+D_loss2 = D_real_loss2 + D_fake_loss2
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
@@ -187,6 +192,9 @@ optimizer = tf.train.AdamOptimizer()
 
 D_trainer=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss,var_list=d_vars)
 G_trainer=tf.train.AdamOptimizer(lr_g, beta1=0.5).minimize(G_loss,var_list=g_vars)
+
+D_trainer2=tf.train.AdamOptimizer(lr_d, beta1=0.5).minimize(D_loss2,var_list=d_vars)
+
 D_gradients = 1
 #optimizer.compute_gradients(D_loss, d_vars)
 G_gradients =1
