@@ -73,14 +73,14 @@ def generator(z,training, reuse=None):
 
 def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        x = tf.layers.dense(z, 512 * 32 * 32)
+        x = tf.layers.dense(z, 1028 * 32 * 32)
         x = leaky_on_batch_norm(x)
-        x = tf.reshape(x, (-1, 32, 32, 512))
+        x = tf.reshape(x, (-1, 32, 32, 1028))
 
-        x = conv2d(x, 5, 512, 1, 'same')
+        x = conv2d(x, 5, 1028, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d_transpose(x, 4, 256, 2, 'same')
+        x = conv2d_transpose(x, 4, 512, 2, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d(x, 5, 256, 1, 'same')
@@ -180,7 +180,7 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0001
+lr_d = 0.0002
 
 
 tvars = tf.trainable_variables()
@@ -282,7 +282,7 @@ with tf.Session() as sess:
 
 
 #reshaped_rgb = gen_samples[epochs-1].reshape(32, 32, 3)
-np.save('gen_samples_apple_pie2', gen_samples)
+np.save('gen_samples_pizza', gen_samples)
 #img = Image.fromarray(reshaped_rgb, 'RGB')
 #img.show()
 #reshaped_rgb_last = gen_samples[epochs-1].reshape(64, 64, 3)
