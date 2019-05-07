@@ -10,7 +10,7 @@ from PIL import Image
 
 num_batches= 50
 batch_size = 20
-epochs= 40
+epochs= 50
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -125,16 +125,16 @@ def discriminator(x, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        x = conv2d(x, 3, 128, 1, 'same')
+        x = conv2d(x, 3, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 128, 2, 'same')
+        x = conv2d(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 128, 2, 'same')
+        x = conv2d(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 128, 2, 'same')
+        x = conv2d(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
 
         x = tf.layers.flatten(x)
@@ -169,8 +169,8 @@ D_output_fake,D_logits_fake=discriminator(G,reuse=True)
 
 #tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32)
 
-D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_uniform(tf.shape(D_logits_real), 0.0, 0.1))
-D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_uniform(tf.shape(D_logits_fake), 0.0, 0.1))
+D_real_loss=loss_func(D_logits_real, tf.zeros_like(D_logits_real) + tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
+D_fake_loss=loss_func(D_logits_fake, tf.ones_like(D_logits_fake) - tf.random_normal(shape=tf.shape(D_logits_real), mean=0.0, stddev=random.uniform(0.0, 0.1), dtype=tf.float32))
 
 D_real_loss2=loss_func(D_logits_real, tf.zeros_like(D_logits_real))
 D_fake_loss2=loss_func(D_logits_fake, tf.ones_like(D_logits_fake))
@@ -180,8 +180,8 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
-lr_g = 0.001
-lr_d = 0.0003
+lr_g = 0.0004
+lr_d = 0.00004
 
 
 tvars = tf.trainable_variables()
@@ -276,7 +276,7 @@ with tf.Session() as sess:
         train_hist['D_losses_real'].append(np.mean(D_losses_real))
         train_hist['G_losses'].append(np.mean(G_losses))
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
-        if epoch % 5 == 0 or epoch < 20:    
+        if epoch % 5 == 0 or epoch < 50:    
             sample_z=np.random.uniform(-1,1,size=(1, 100))
             gen_sample=sess.run(generator(z, training, reuse=True), feed_dict={z:sample_z, training: False})
             gen_samples.append(gen_sample)
