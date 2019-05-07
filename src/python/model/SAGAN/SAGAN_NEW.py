@@ -85,7 +85,7 @@ def generator(z, training, reuse=None):
         x = leaky_on_batch_norm(x)
 
         #adding attention
-        x = attention(x, 256)
+        # x = attention(x, 256)
 
         x = conv2d(x, 5, 256, 1, 'same')
         x = leaky_on_batch_norm(x)
@@ -130,7 +130,7 @@ def discriminator(x, reuse=None):
         x = leaky_on_batch_norm(x)
 
         # adding attention
-        x = attention(x, 256)
+        # x = attention(x, 256)
 
         x = conv2d(x, 4, 256, 2, 'same')
         x = leaky_on_batch_norm(x)
