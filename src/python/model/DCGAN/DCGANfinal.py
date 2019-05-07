@@ -73,11 +73,11 @@ def generator(z,training, reuse=None):
 
 def generator(z, training, reuse=None):
     with tf.variable_scope('gen',reuse=reuse):
-        x = tf.layers.dense(z, 256 * 32 * 32)
+        x = tf.layers.dense(z, 512 * 32 * 32)
         x = leaky_on_batch_norm(x)
-        x = tf.reshape(x, (-1, 32, 32, 256))
+        x = tf.reshape(x, (-1, 32, 32, 512))
 
-        x = conv2d(x, 5, 256, 1, 'same')
+        x = conv2d(x, 5, 512, 1, 'same')
         x = leaky_on_batch_norm(x)
 
         x = conv2d_transpose(x, 4, 256, 2, 'same')
@@ -180,7 +180,7 @@ D_loss2 = D_real_loss2 + D_fake_loss2
 G_loss = loss_func(D_logits_fake, tf.zeros_like(D_logits_fake))
 
 lr_g = 0.001
-lr_d = 0.0003
+lr_d = 0.0002
 
 
 tvars = tf.trainable_variables()
