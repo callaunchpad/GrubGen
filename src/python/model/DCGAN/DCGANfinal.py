@@ -8,9 +8,9 @@ sys.path.insert(0, '../../dataloader')
 from dataloader import DataLoader
 from PIL import Image
 
-num_batches= 40
+num_batches= 50
 batch_size = 20
-epochs= 100
+epochs= 40
 
 #mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=[])
 
@@ -125,16 +125,16 @@ def discriminator(x, reuse=None):
 
 def discriminator(x, reuse=None):
     with tf.variable_scope('dis',reuse=reuse):
-        x = conv2d(x, 3, 256, 1, 'same')
+        x = conv2d(x, 3, 128, 1, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 256, 2, 'same')
+        x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 256, 2, 'same')
+        x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
 
-        x = conv2d(x, 4, 256, 2, 'same')
+        x = conv2d(x, 4, 128, 2, 'same')
         x = leaky_on_batch_norm(x)
 
         x = tf.layers.flatten(x)
